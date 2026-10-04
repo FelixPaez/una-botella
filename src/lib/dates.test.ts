@@ -4,6 +4,7 @@ import type { Config, Place } from '../config.types.ts';
 import { initialFlow } from '../state/flow.ts';
 import {
   addDays,
+  atTime,
   availableTimes,
   buildDays,
   daypartOf,
@@ -11,6 +12,7 @@ import {
   formatSlot,
   formatTimeSpoken,
   expandWindow,
+  formatEdge,
   placeTimes,
   quipFor,
   suggestedTime,
@@ -94,6 +96,20 @@ describe('horarios', () => {
       '10:15',
       '10:30',
     ]);
+  });
+
+  it('una franja puede llegar hasta medianoche (24:00 es las 12 de la noche de ese mismo día)', () => {
+    const night: Place = { ...cafe, times: { from: '23:00', to: '24:00' } };
+    expect(placeTimes(night, '2026-10-06', schedule)).toEqual(['23:00', '23:15', '23:30', '23:45', '24:00']);
+    expect(formatTimeSpoken('24:00', '12h')).toBe('12:00 de la noche');
+    expect(formatTimeSpoken('12:30', '12h')).toBe('12:30 del mediodía');
+    expect(formatEdge('12:00')).toBe('Mediodía');
+    expect(formatEdge('24:00')).toBe('Medianoche');
+    // El martes 6 a las 24:00 es el miércoles 7 a las 00:00 en Cuba (04:00 UTC).
+    expect(atTime('2026-10-06', '24:00').toISOString()).toBe('2026-10-07T04:00:00.000Z');
+    // Con la franja por defecto (12:00–24:00), hoy a las 23:00 ya no queda nada con 2 h de margen.
+    const late = havana('2026-10-04', '23:00');
+    expect(availableTimes(undefined, '2026-10-04', late, { ...schedule, defaultWindow: { from: '12:00', to: '24:00' } })).toEqual([]);
   });
 
   it('propone la hora del medio de lo que queda libre', () => {

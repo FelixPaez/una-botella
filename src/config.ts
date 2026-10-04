@@ -106,6 +106,8 @@ export const config: Config = {
 
   // Cada lugar es una postal. Funciona igual con 3, 5 u 8.
   // `times`: la franja en la que se puede quedar; ella elige la hora exacta deslizando el sol.
+  // Sin `times`, de 12 del mediodía a 12 de la noche (`schedule.defaultWindow`). Si un plan
+  // solo tiene sentido a ciertas horas, ponle la suya, ej. times: { from: '19:00', to: '24:00' }.
   // Fotos: WebP de 1000×800 px y menos de 150 KB en `public/places/`.
   places: [
     {
@@ -124,7 +126,6 @@ export const config: Config = {
       description:
         'Plan tranquilo de tarde: algo rico, un buen lugar en la arena y que la conversación haga el resto.',
       illustration: 'picnic',
-      times: { from: '15:00', to: '18:00' },
     },
     {
       id: 'cafe',
@@ -133,7 +134,6 @@ export const config: Config = {
       description:
         'Una mesa junto a la ventana, el mar de fondo y todo el tiempo del mundo para conocernos mejor.',
       illustration: 'cafe',
-      times: { from: '09:00', to: '18:00' },
     },
     {
       id: 'paseo-nocturno',
@@ -142,7 +142,6 @@ export const config: Config = {
       description:
         'Caminamos junto al mar con la brisa de la noche. Aviso: soy muy competitivo contando estrellas.',
       illustration: 'night-walk',
-      times: { from: '19:30', to: '22:00' },
     },
     {
       id: 'misterio',
@@ -160,7 +159,7 @@ export const config: Config = {
     excludedDates: [], // ej. ['2026-10-12']
     minHoursAhead: 2,
     stepMinutes: 15, // ella elige la hora de 15 en 15 minutos
-    defaultWindow: { from: '10:00', to: '20:00' }, // para los lugares sin `times`
+    defaultWindow: { from: '12:00', to: '24:00' }, // del mediodía a medianoche, para los lugares sin `times`
     sunsetMinutesBefore: { from: 90, to: 15 }, // atardecer: de 90 a 15 min antes de la puesta
     dayparts: { morning: '05:00', afternoon: '12:00', night: '19:00' },
   },

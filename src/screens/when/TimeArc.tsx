@@ -6,7 +6,7 @@ import { feedback } from '../../design/feedback.ts';
 import { spring } from '../../design/motion.ts';
 import { usePointerFine } from '../../hooks/useMediaQuery.ts';
 import { fill } from '../../lib/format.ts';
-import { daypartSpoken, formatSlot, formatTimeSpoken, moodForChoice } from '../../lib/dates.ts';
+import { daypartSpoken, formatEdge, formatSlot, formatTimeSpoken, moodForChoice } from '../../lib/dates.ts';
 import type { Mood } from '../../lib/mood.ts';
 
 type Props = {
@@ -190,10 +190,10 @@ export function TimeArc({ times, value, date, sunset, onChange }: Props) {
           {current && daypartSpoken(current) && <span className="time-arc__daypart">{daypartSpoken(current)}</span>}
         </div>
         <span className="time-arc__end" style={{ left: `${(start.x / W) * 100}%` }} aria-hidden="true">
-          {formatSlot(times[0])}
+          {formatEdge(times[0])}
         </span>
         <span className="time-arc__end" style={{ left: `${(end.x / W) * 100}%` }} aria-hidden="true">
-          {formatSlot(times[last])}
+          {formatEdge(times[last])}
         </span>
       </div>
 

@@ -60,7 +60,7 @@ Cada lugar es una postal. Funciona igual con 3, 5 u 8. Copia un bloque dentro de
 
 - `times` es **la franja en la que puedes quedar**. Ella elige la hora exacta deslizando el sol por un arco,
   de 15 en 15 minutos (`schedule.stepMinutes`), y el mar cambia a esa hora mientras lo mueve.
-  - `{ from: '16:00', to: '19:00' }`: cualquier hora entre las 4:00 y las 7:00 de la tarde (formato 24 h).
+  - `{ from: '16:00', to: '19:00' }`: cualquier hora entre las 4:00 y las 7:00 de la tarde (formato 24 h; medianoche es `'24:00'`).
   - `'sunset'`: la franja se calcula sola cada día con la **puesta de sol real** (de 90 a 15 minutos antes).
   - `['16:00', '17:30']`: solo esas horas, si prefieres horas fijas.
   - Sin `times`: la franja por defecto (`schedule.defaultWindow`).
@@ -88,7 +88,7 @@ En `schedule`:
 | `excludedDates` | Fechas concretas que no puedes, ej. `['2026-10-12']` |
 | `minHoursAhead` | Si elige hoy, solo horas que empiecen dentro de al menos estas horas |
 | `stepMinutes` | Cada cuántos minutos se puede elegir dentro de una franja (15 → 6:00, 6:15, 6:30…) |
-| `defaultWindow` | Franja de los lugares que no tienen la suya, ej. `{ from: '10:00', to: '20:00' }` |
+| `defaultWindow` | Franja de los lugares que no tienen la suya; hoy `{ from: '12:00', to: '24:00' }` (del mediodía a medianoche) |
 | `sunsetMinutesBefore` | Planes de atardecer: desde y hasta cuántos minutos antes de la puesta, ej. `{ from: 90, to: 15 }` |
 | `dayparts` | A qué hora empiezan la mañana, la tarde y la noche (para decir «6:30 de la tarde») |
 

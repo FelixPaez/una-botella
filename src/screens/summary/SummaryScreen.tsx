@@ -45,7 +45,8 @@ export function SummaryScreen() {
   const day = fromISODate(date);
   const [h] = time.split(':').map(Number);
   const stampDate = `${day.getDate()} ${new Intl.DateTimeFormat('es', { month: 'short' }).format(day).replace('.', '').toUpperCase()}`;
-  const stampTime = config.timeFormat === '12h' ? `${formatSlot(time)} ${h < 12 ? 'AM' : 'PM'}` : formatSlot(time);
+  // '24:00' (medianoche) es AM; '12:00' (mediodía) es PM.
+  const stampTime = config.timeFormat === '12h' ? `${formatSlot(time)} ${h % 24 < 12 ? 'AM' : 'PM'}` : formatSlot(time);
   const ring = `MENSAJE EN UNA BOTELLA · ${config.location.name.toUpperCase()} · `;
 
   const edit = (section: Section) => dispatch({ type: 'EDIT', section });

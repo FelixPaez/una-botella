@@ -65,16 +65,27 @@ export function formatSlot(time: string, format: Config['timeFormat'] = config.t
 }
 
 /** «de la tarde» (12 h) o nada (24 h). */
-export const daypartSpoken = (time: string, format: Config['timeFormat'] = config.timeFormat): string =>
-  format === '24h' ? '' : DAYPART_SPOKEN[daypartOf(time)];
-
-/** Para frases: «6:30 de la tarde» (12 h) o «18:30». */
-export function formatTimeSpoken(time: string, format: Config['timeFormat'] = config.timeFormat): string {
-  if (format === '24h') return formatSlot(time, '24h');
-  return `${formatSlot(time, '12h')} ${DAYPART_SPOKEN[daypartOf(time)]}`;
+export function daypartSpoken(time: string, format: Config['timeFormat'] = config.timeFormat): string {
+  if (format === '24h') return '';
+  // «12:30 del mediodía», no «de la tarde».
+  return time.startsWith('12:') ? 'del mediodía' : DAYPART_SPOKEN[daypartOf(time)];
 }
 
-const toTime = (minutes: number) => `${pad(Math.floor(minutes / 60) % 24)}:${pad(minutes % 60)}`;
+/** Para frases: «6:30 de la tarde» (12 h) o «18:30». '24:00' es «12:00 de la noche» de ese mismo día. */
+export function formatTimeSpoken(time: string, format: Config['timeFormat'] = config.timeFormat): string {
+  if (format === '24h') return formatSlot(time, '24h');
+  return `${formatSlot(time, '12h')} ${daypartSpoken(time, '12h')}`;
+}
+
+/** Los extremos del arco: «Mediodía», «Medianoche» o la hora. */
+export function formatEdge(time: string, format: Config['timeFormat'] = config.timeFormat): string {
+  if (time === '12:00') return 'Mediodía';
+  if (time === '24:00' || time === '00:00') return 'Medianoche';
+  return formatSlot(time, format);
+}
+
+// Sin dar la vuelta a las 24: el final de una franja «hasta medianoche» es '24:00' (y no las 00:00 de ese día).
+const toTime = (minutes: number) => `${pad(Math.floor(minutes / 60))}:${pad(minutes % 60)}`;
 
 /** Las horas de una franja (en minutos desde las 00:00), cada `step` minutos y sin salirse de ella. */
 export function expandWindow(from: number, to: number, step: number): string[] {

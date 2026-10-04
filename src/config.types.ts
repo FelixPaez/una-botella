@@ -14,7 +14,7 @@ export type LetterAdvance = 'tap' | 'hold' | 'swipe';
 /** Texto de ayuda en dos versiones: pantalla táctil y ratón. */
 export type Hint = { touch: string; mouse: string };
 
-/** Franja horaria en formato 24 h: desde `from` hasta `to`, ambas incluidas. */
+/** Franja horaria en formato 24 h: desde `from` hasta `to`, ambas incluidas ('24:00' = medianoche). */
 export type TimeWindow = { from: string; to: string };
 
 export type Place = {

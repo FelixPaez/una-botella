@@ -25,8 +25,12 @@ export function checkConfig(config: Config): string[] {
   const add = (where: string, what: string) => problems.push(`${where}: ${what}`);
   const isTodo = (text: string) => /\bTODO\b/.test(text);
   const checkWindow = (where: string, w: TimeWindow) => {
-    if (!TIME.test(w.from) || !TIME.test(w.to)) add(where, 'usa horas HH:MM (24 h), ej. { from: \'15:00\', to: \'18:00\' }');
-    else if (w.from >= w.to) add(where, `la franja debe empezar antes de terminar ("${w.from}" → "${w.to}")`);
+    // Una franja puede terminar a medianoche: '24:00'.
+    if (!TIME.test(w.from) || !(TIME.test(w.to) || w.to === '24:00')) {
+      add(where, 'usa horas HH:MM (24 h), ej. { from: \'15:00\', to: \'18:00\' } o hasta medianoche: \'24:00\'');
+    } else if (w.from >= w.to) {
+      add(where, `la franja debe empezar antes de terminar ("${w.from}" → "${w.to}")`);
+    }
   };
 
   const phone = config.sender.whatsapp;
