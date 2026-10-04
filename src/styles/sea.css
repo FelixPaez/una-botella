@@ -318,6 +318,7 @@
 }
 .ripple,
 .touch-bubble,
+.droplet,
 .sparkle {
   position: absolute;
   left: 0;
@@ -335,6 +336,13 @@
   width: 8px;
   height: 8px;
   margin: -4px 0 0 -4px;
+}
+.droplet {
+  width: 4px;
+  height: 6px;
+  margin: -3px 0 0 -2px;
+  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+  background: rgb(255 255 255 / 0.9);
 }
 .sparkle {
   width: 18px;

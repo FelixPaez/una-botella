@@ -1,14 +1,8 @@
 import { useEffect, useRef } from 'react';
 import { cssEase, ease } from '../design/motion.ts';
 import { prefersReducedMotion } from '../lib/device.ts';
+import { readHorizon } from '../lib/horizon.ts';
 import { seaBus } from './seaBus.ts';
-
-/** Fracción de la pantalla donde está el horizonte (sale de la variable CSS --horizon). */
-function readHorizon(): number {
-  const value = getComputedStyle(document.documentElement).getPropertyValue('--horizon');
-  const fraction = parseFloat(value) / 100;
-  return Number.isFinite(fraction) ? fraction : 0.44;
-}
 
 const SPARKLE_SVG =
   '<svg viewBox="-10 -10 20 20" width="18" height="18"><path d="M0-9C.8-2 2-.8 9 0 2 .8.8 2 0 9-.8 2-2 .8-9 0-2-.8-.8-2 0-9z" fill="currentColor"/></svg>';
@@ -32,11 +26,13 @@ export function Ripples({ lite }: { lite: boolean }) {
         return el;
       });
     const rings = make('ripple', 6);
-    const drops = make('touch-bubble', 12);
+    const drops = make('touch-bubble', 16);
+    const droplets = make('droplet', 8);
     const sparkles = make('sparkle', 3, SPARKLE_SVG);
     let r = 0;
     let d = 0;
     let s = 0;
+    let w = 0;
     let horizon = readHorizon();
     const reduced = prefersReducedMotion();
     const easing = cssEase(ease.surface);
@@ -83,6 +79,53 @@ export function Ripples({ lite }: { lite: boolean }) {
       }
     };
 
+    /** Algo cae al agua: onda grande, gotas que saltan en arco y burbujas. */
+    const splash = (x: number, y: number) => {
+      if (reduced) {
+        ripple(x, y);
+        return;
+      }
+      rings[r++ % rings.length].animate(
+        [
+          { opacity: 0.95, transform: at(x, y, 0.2) },
+          { opacity: 0, transform: at(x, y, 2.4) },
+        ],
+        { duration: 1400, easing },
+      );
+      rings[r++ % rings.length].animate(
+        [
+          { opacity: 0.7, transform: at(x, y, 0.1) },
+          { opacity: 0, transform: at(x, y, 1.6) },
+        ],
+        { duration: 1200, delay: 160, easing },
+      );
+      for (let i = 0; i < 6; i++) {
+        const dx = (i - 2.5) * 9 + (Math.random() - 0.5) * 8;
+        const height = 26 + Math.random() * 28;
+        droplets[w++ % droplets.length].animate(
+          [
+            { opacity: 0, transform: at(x, y), easing: cssEase(ease.surface) },
+            { opacity: 1, transform: at(x + dx * 0.5, y - height), offset: 0.45, easing: cssEase(ease.sink) },
+            { opacity: 0, transform: at(x + dx, y + 4) },
+          ],
+          { duration: 650 + Math.random() * 200 },
+        );
+      }
+      for (let i = 0; i < (lite ? 2 : 4); i++) {
+        const size = 0.5 + Math.random() * 0.8;
+        const dx = (Math.random() - 0.5) * 36;
+        const rise = 50 + Math.random() * 60;
+        drops[d++ % drops.length].animate(
+          [
+            { opacity: 0, transform: at(x, y + 8, size) },
+            { opacity: 1, transform: at(x + dx * 0.2, y - rise * 0.1, size), offset: 0.2 },
+            { opacity: 0, transform: at(x + dx, y - rise, size) },
+          ],
+          { duration: 1400 + Math.random() * 500, delay: 200 + i * 90, easing },
+        );
+      }
+    };
+
     const sparkle = (x: number, y: number) => {
       sparkles[s++ % sparkles.length].animate(
         reduced
@@ -112,6 +155,7 @@ export function Ripples({ lite }: { lite: boolean }) {
     window.addEventListener('resize', onResize, { passive: true });
     const off = seaBus.on((event) => {
       if (event.type === 'ripple') touch(event.x, event.y);
+      if (event.type === 'splash') splash(event.x, event.y);
     });
 
     return () => {

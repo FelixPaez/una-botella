@@ -121,6 +121,11 @@ export const sound = {
   },
 };
 
+/** Precarga el motor (2 KB) en tiempo libre, solo si va a sonar. */
+export function prefetchSoundEngine() {
+  if (config.sound.enabled && !muted) void import('./engine.ts').catch(() => undefined);
+}
+
 /** Escucha el primer gesto (los navegadores no dejan sonar antes) y las pausas de pestaña. */
 export function initSound() {
   if (!config.sound.enabled) return;

@@ -1,5 +1,5 @@
-/** Efectos puntuales que cualquier pantalla puede pedirle al mar. */
-export type SeaEvent = { type: 'ripple'; x: number; y: number };
+/** Efectos puntuales que cualquier pantalla puede pedirle al mar (coordenadas de pantalla). */
+export type SeaEvent = { type: 'ripple'; x: number; y: number } | { type: 'splash'; x: number; y: number };
 
 const listeners = new Set<(event: SeaEvent) => void>();
 

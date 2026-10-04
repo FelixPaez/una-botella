@@ -21,7 +21,19 @@ npm run dev        # abre http://localhost:5173
 npm run dev:movil  # igual, pero accesible desde tu móvil en la misma wifi
 ```
 
-Para revisar cada hora del cielo: añade `?hora=manana`, `?hora=dia`, `?hora=atardecer` o `?hora=noche` a la dirección.
+Parámetros para revisar (se añaden al final de la dirección):
+
+| Parámetro | Qué hace |
+|---|---|
+| `?hora=manana` · `dia` · `atardecer` · `noche` | Fuerza la hora del cielo |
+| `?paso=inicio` | Empieza de cero (olvida el progreso guardado) |
+| `?paso=carta` · `carta-2` · `carta-3` | Abre la carta en esa página |
+| `?paso=pregunta` | Abre la pregunta |
+| `?demo` | Muestra del sistema de diseño |
+
+Se pueden combinar: `?paso=inicio&hora=noche`.
+
+Si recargas a mitad de la experiencia, retoma donde estabas (se guarda solo en la pestaña, sin cookies).
 
 ## Comprobaciones
 

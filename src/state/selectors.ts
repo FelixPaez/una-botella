@@ -1,4 +1,27 @@
-import type { FlowState } from './flow.ts';
+import type { BottlePose } from '../actors/geometry.ts';
+import type { FlowState, Step } from './flow.ts';
+
+/** Oleaje de cada paso: medio en la intro, un pico al destaparla y calma para leer. */
+export function swellFor(step: Step): number {
+  switch (step) {
+    case 'intro':
+      return 0.5;
+    case 'opening':
+      return 0.72;
+    case 'letter':
+    case 'question':
+      return 0.22;
+    default:
+      return 0.4;
+  }
+}
+
+/** Dónde está la botella en cada paso. */
+export function bottlePoseFor(step: Step): BottlePose {
+  if (step === 'intro') return 'float';
+  if (step === 'opening') return 'opening';
+  return 'away';
+}
 
 export type Progress = {
   visible: boolean;

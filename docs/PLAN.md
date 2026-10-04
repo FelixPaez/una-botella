@@ -86,8 +86,8 @@ question ─Sí─▶ celebration ─▶ plan ⇄ datetime ⇄ summary ─WhatsA
 | Fase | Contenido | Estado |
 |---|---|---|
 | 0 | Plan | ✅ aprobado |
-| 1 | Base, sistema de diseño, mar persistente, barquito, sonido, config.ts, layout responsive, despliegue | ✅ entregada, pendiente de OK |
-| 2 | Intro (botella), apertura y carta con sus gestos | — |
+| 1 | Base, sistema de diseño, mar persistente, barquito, sonido, config.ts, layout responsive, despliegue | ✅ aprobada |
+| 2 | Intro (botella), apertura y carta con sus gestos | ✅ entregada, pendiente de OK |
 | 3 | La pregunta (botón No), «Mejor otro día» y celebración | — |
 | 4 | Postales, fecha y hora, mar según la hora, resumen con matasellos, WhatsApp y final | — |
 | 5 | Lighthouse, og:image, reduced motion, 360 px, service worker y README completo | — |
