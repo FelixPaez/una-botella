@@ -59,3 +59,29 @@ export function Button({
     </m.button>
   );
 }
+
+type ButtonLinkProps = Omit<HTMLMotionProps<'a'>, 'children'> & {
+  icon?: ReactNode;
+  children: ReactNode;
+  block?: boolean;
+};
+
+/** Enlace con aspecto de botón principal (para abrir WhatsApp con un enlace real). */
+export function ButtonLink({ icon, children, block = false, className = '', ...rest }: ButtonLinkProps) {
+  return (
+    <m.a
+      whileHover={{ y: -1 }}
+      whileTap={{ scale: 0.97 }}
+      transition={transition.tap}
+      className={`${BASE} ${VARIANTS.primary} no-underline ${block ? 'w-full' : ''} ${className}`}
+      {...rest}
+    >
+      {icon && (
+        <span aria-hidden="true" className="-ml-1 grid size-5 place-items-center">
+          {icon}
+        </span>
+      )}
+      <span>{children}</span>
+    </m.a>
+  );
+}

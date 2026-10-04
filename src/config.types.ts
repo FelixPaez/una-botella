@@ -50,7 +50,8 @@ export type Config = {
     /** URL pública completa terminada en "/". Si no se indica, se calcula sola en GitHub Pages. */
     siteUrl?: string;
   };
-  location: { name: string; latitude: number; longitude: number };
+  /** `timeZone`: zona horaria IANA del lugar; los horarios del plan se calculan con ella. */
+  location: { name: string; latitude: number; longitude: number; timeZone: string };
   timeFormat: '12h' | '24h';
   intro: { title: string; subtitle: string; hint: Hint };
   letter: {
@@ -81,7 +82,36 @@ export type Config = {
     /** Hora (24 h) a la que empieza cada franja de horarios. */
     dayparts: { morning: string; afternoon: string; night: string };
   };
-  note: { enabled: boolean; maxLength: number; placeholder: string };
+  note: { enabled: boolean; maxLength: number; placeholder: string; label: string };
+  /** Textos de la pantalla de postales. */
+  plan: { label: string; title: string; next: string; save: string; cancel: string; flipHint: string; chosen: string };
+  /** Textos de la pantalla de fecha y hora. */
+  when: {
+    label: string;
+    title: string;
+    timeTitle: string;
+    pickDayFirst: string;
+    today: string;
+    tomorrow: string;
+    back: string;
+    next: string;
+    save: string;
+  };
+  /** Textos del resumen. */
+  summary: {
+    label: string;
+    title: string;
+    planLabel: string;
+    dateLabel: string;
+    timeLabel: string;
+    noteLabel: string;
+    noNote: string;
+    edit: string;
+    confirm: string;
+    copy: string;
+    copied: string;
+    back: string;
+  };
   whatsapp: {
     /** Una línea por elemento. Huecos: {lugar} {fecha} {hora} {nota}. */
     template: string[];

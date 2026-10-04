@@ -5,6 +5,7 @@ import { config } from './config.ts';
 import { TopBar } from './layout/TopBar.tsx';
 import { getDeviceProfile } from './lib/device.ts';
 import type { Mood } from './lib/mood.ts';
+import { atTime, moodForChoice } from './lib/dates.ts';
 import { moonPhase } from './lib/moon.ts';
 import { Experience } from './screens/Experience.tsx';
 import { Sea } from './sea/Sea.tsx';
@@ -37,10 +38,18 @@ export function App() {
   );
 }
 
-type ShellProps = { mood: Mood; swell: number; progress: Progress; actors?: ReactNode; children: ReactNode };
+type ShellProps = {
+  mood: Mood;
+  swell: number;
+  progress: Progress;
+  /** Fase de la luna del cielo nocturno (la del día elegido, o la de hoy). */
+  moon?: number;
+  actors?: ReactNode;
+  children: ReactNode;
+};
 
 /** Lo que nunca se desmonta: el mar, el horizonte con el barquito y la cinta de borrador. */
-function SceneShell({ mood, swell, progress, actors, children }: ShellProps) {
+function SceneShell({ mood, swell, progress, moon = MOON_TODAY, actors, children }: ShellProps) {
   // El mar sonoro sigue al mar visible.
   useEffect(() => sound.setAmbient({ mood, swell }), [mood, swell]);
   return (
@@ -48,7 +57,7 @@ function SceneShell({ mood, swell, progress, actors, children }: ShellProps) {
       <Sea
         mood={mood}
         swell={swell}
-        moonPhase={MOON_TODAY}
+        moonPhase={moon}
         south={config.location.latitude < 0}
         lite={DEVICE.lite}
         actors={actors}
@@ -68,12 +77,18 @@ function ExperienceRoot() {
   );
 }
 
+/** Pasos en los que el mar ya anticipa la hora de la cita. */
+const CHOSEN_SKY = new Set(['datetime', 'summary', 'farewell']);
+
 function ExperienceScene() {
   const { state } = useFlow();
   const realMood = useRealMood();
+  const { date, time } = state.choice;
+  const chosen = date && time && CHOSEN_SKY.has(state.step) ? { date, time } : null;
   return (
     <SceneShell
-      mood={FORCED_MOOD ?? realMood}
+      mood={FORCED_MOOD ?? (chosen ? moodForChoice(chosen.date, chosen.time) : realMood)}
+      moon={chosen ? moonPhase(atTime(chosen.date, '21:00')) : MOON_TODAY}
       swell={swellFor(state.step)}
       progress={progressOf(state, PAGES)}
       actors={<BottleActor pose={bottlePoseFor(state.step)} lite={DEVICE.lite} />}

@@ -3,6 +3,7 @@ import type { Config, Place, Weekday } from '../config.types.ts';
 import { moonIllumination, moonPhase } from './moon.ts';
 import { moodAt, type Mood } from './mood.ts';
 import { sunTimes } from './sun.ts';
+import { isoDateIn, wallTime, zonedInstant } from './zone.ts';
 
 type Schedule = Config['schedule'];
 type Location = Config['location'];
@@ -19,21 +20,25 @@ const minutesOf = (time: string) => {
   return h * 60 + m;
 };
 
-/** Día local en formato AAAA-MM-DD. */
-export const toISODate = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+/** El día de hoy (AAAA-MM-DD) en el lugar de la cita, no en el del dispositivo. */
+export const todayIn = (now: Date, location: Location = config.location) => isoDateIn(now, location.timeZone);
 
+/** Aritmética de calendario (no sumar 24 h): así el cambio de hora no descuadra los días. */
+export function addDays(iso: string, days: number): string {
+  const [y, m, d] = iso.split('-').map(Number);
+  const date = new Date(Date.UTC(y, m - 1, d + days));
+  return `${date.getUTCFullYear()}-${pad(date.getUTCMonth() + 1)}-${pad(date.getUTCDate())}`;
+}
+
+/** Ese día a medianoche del dispositivo: solo para saber qué día de la semana es y nombrarlo. */
 export function fromISODate(iso: string): Date {
   const [y, m, d] = iso.split('-').map(Number);
   return new Date(y, m - 1, d);
 }
 
-/** Fecha y hora locales de un día y una hora 'HH:MM'. */
-export function atTime(iso: string, time: string): Date {
-  const date = fromISODate(iso);
-  const [h, m] = time.split(':').map(Number);
-  date.setHours(h, m, 0, 0);
-  return date;
-}
+/** El instante de ese día a esa hora 'HH:MM' en el lugar de la cita. */
+export const atTime = (iso: string, time: string, location: Location = config.location): Date =>
+  zonedInstant(iso, time, location.timeZone);
 
 const capitalize = (text: string) => text.charAt(0).toUpperCase() + text.slice(1);
 
@@ -66,8 +71,9 @@ export function formatTimeSpoken(time: string, format: Config['timeFormat'] = co
   return `${formatSlot(time, '12h')} ${DAYPART_SPOKEN[daypartOf(time)]}`;
 }
 
-const roundTo15 = (d: Date) => {
-  const total = Math.round((d.getHours() * 60 + d.getMinutes()) / 15) * 15;
+const roundTo15 = (d: Date, timeZone: string) => {
+  const { hour, minute } = wallTime(d, timeZone);
+  const total = Math.round((hour * 60 + minute) / 15) * 15;
   return `${pad(Math.floor(total / 60) % 24)}:${pad(total % 60)}`;
 };
 
@@ -82,7 +88,7 @@ export function placeTimes(
   if (place?.times === 'sunset') {
     const sun = sunTimes(fromISODate(iso), location.latitude, location.longitude);
     times = sun
-      ? schedule.sunsetOffsetsMinutes.map((offset) => roundTo15(new Date(sun.sunset.getTime() - offset * 60_000)))
+      ? schedule.sunsetOffsetsMinutes.map((offset) => roundTo15(new Date(sun.sunset.getTime() - offset * 60_000), location.timeZone))
       : schedule.defaultTimes;
   } else {
     times = place?.times?.length ? place.times : schedule.defaultTimes;
@@ -99,9 +105,9 @@ export function availableTimes(
   location: Location = config.location,
 ): string[] {
   const times = placeTimes(place, iso, schedule, location);
-  if (iso !== toISODate(now)) return times;
+  if (iso !== todayIn(now, location)) return times;
   const limit = now.getTime() + schedule.minHoursAhead * 3_600_000;
-  return times.filter((t) => atTime(iso, t).getTime() >= limit);
+  return times.filter((t) => atTime(iso, t, location).getTime() >= limit);
 }
 
 export type Day = {
@@ -128,19 +134,18 @@ const longWeekday = new Intl.DateTimeFormat('es', { weekday: 'long' });
 const shortMonth = new Intl.DateTimeFormat('es', { month: 'short' });
 const trimDot = (text: string) => text.replace(/\.$/, '');
 
-/** Los días que se pueden elegir, desde hoy, calculados en el móvil de ella. */
+/** Los días que se pueden elegir, desde hoy (hoy en Santa Clara), calculados en el móvil de ella. */
 export function buildDays(
   now: Date,
   place: Place | undefined,
   schedule: Schedule = config.schedule,
   location: Location = config.location,
 ): Day[] {
-  const today = toISODate(now);
-  const tomorrow = toISODate(new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1));
+  const today = todayIn(now, location);
+  const tomorrow = addDays(today, 1);
   return Array.from({ length: schedule.daysAhead }, (_, i) => {
-    // Aritmética de calendario (no sumar 24 h): así el cambio de hora no descuadra los días.
-    const date = new Date(now.getFullYear(), now.getMonth(), now.getDate() + i);
-    const iso = toISODate(date);
+    const iso = addDays(today, i);
+    const date = fromISODate(iso);
     const weekdayName = WEEKDAYS[date.getDay()];
     const excluded = schedule.excludedWeekdays.includes(weekdayName) || schedule.excludedDates.includes(iso);
     const times = excluded ? [] : availableTimes(place, iso, now, schedule, location);
@@ -153,7 +158,7 @@ export function buildDays(
       isToday: iso === today,
       isTomorrow: iso === tomorrow,
       isWeekend: date.getDay() === 0 || date.getDay() === 6,
-      moon: moonPhase(new Date(date.getFullYear(), date.getMonth(), date.getDate(), 21)),
+      moon: moonPhase(atTime(iso, '21:00', location)),
       times,
       available: times.length > 0,
       reason: excluded ? 'ese día no está disponible' : times.length === 0 ? 'ya no quedan horarios' : undefined,
@@ -169,7 +174,7 @@ export function groupTimes(times: string[], schedule: Schedule = config.schedule
 
 /** Cómo estará el cielo a esa hora (el mar se pone así al elegirla). */
 export const moodForChoice = (iso: string, time: string, location: Location = config.location): Mood =>
-  moodAt(atTime(iso, time), location.latitude, location.longitude);
+  moodAt(atTime(iso, time, location), location.latitude, location.longitude, location.timeZone);
 
 /** Guiño según el día elegido (luna llena, luna nueva, hoy mismo, fin de semana). */
 export function quipFor(day: Day): string | null {

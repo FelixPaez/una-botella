@@ -32,7 +32,8 @@ export const config: Config = {
   },
 
   // Se usa para la luna, la hora real del cielo y los horarios de atardecer.
-  location: { name: 'Santa Clara, Cuba', latitude: 22.41, longitude: -79.96 },
+  // Las horas son siempre las de esta zona, aunque el móvil esté en otra.
+  location: { name: 'Santa Clara, Cuba', latitude: 22.41, longitude: -79.96, timeZone: 'America/Havana' },
 
   // '12h' → «6:30 de la tarde» · '24h' → «18:30»
   timeFormat: '12h',
@@ -165,7 +166,46 @@ export const config: Config = {
   note: {
     enabled: true,
     maxLength: 140,
+    label: 'Una nota (si quieres)',
     placeholder: 'Si quieres, déjame una nota…',
+  },
+
+  // Textos de las pantallas del plan (títulos y botones).
+  plan: {
+    label: 'El plan',
+    title: '¿Qué te apetece?',
+    next: 'Elegir el día',
+    save: 'Guardar',
+    cancel: 'Volver al resumen',
+    flipHint: 'Toca para descubrirlo',
+    chosen: 'Elegido',
+  },
+
+  when: {
+    label: 'La fecha',
+    title: '¿Qué día te viene bien?',
+    timeTitle: '¿A qué hora?',
+    pickDayFirst: 'Elige primero un día.',
+    today: 'Hoy',
+    tomorrow: 'Mañana',
+    back: 'Volver',
+    next: 'Ver el resumen',
+    save: 'Guardar',
+  },
+
+  summary: {
+    label: 'El resumen',
+    title: 'Así queda nuestra postal',
+    planLabel: 'Plan',
+    dateLabel: 'Día',
+    timeLabel: 'Hora',
+    noteLabel: 'Nota',
+    noNote: 'Sin nota',
+    edit: 'Cambiar',
+    confirm: 'Confirmar por WhatsApp',
+    copy: '¿No se abrió WhatsApp? Copiar el mensaje',
+    copied: 'Mensaje copiado. Pégalo en nuestro chat.',
+    back: 'Volver',
   },
 
   whatsapp: {

@@ -1,3 +1,5 @@
+import { config } from '../config.ts';
+import { addDays, availableTimes, todayIn } from '../lib/dates.ts';
 import { initialFlow, type FlowState, type Step } from './flow.ts';
 
 /** Clave en sessionStorage (no es una cookie, no sale del móvil y se borra al cerrar la pestaña). */
@@ -43,7 +45,7 @@ export function settle(state: FlowState, pages: number): FlowState {
   return { ...state, page, dir: 1 };
 }
 
-/** ?paso=inicio|carta|carta-2|carta-3|carta-4|pregunta: abre ese paso directamente (para revisar). */
+/** ?paso=inicio|carta|carta-2…|pregunta|plan|fecha|resumen|final: abre ese paso directamente (para revisar). */
 export function stateForParam(param: string, pages: number): FlowState | null {
   const letter = /^carta(?:-(\d))?$/.exec(param);
   if (letter) {
@@ -52,6 +54,17 @@ export function stateForParam(param: string, pages: number): FlowState | null {
   }
   if (param === 'inicio') return initialFlow;
   if (param === 'pregunta') return { ...initialFlow, step: 'question', page: pages - 1 };
+  if (param === 'plan') return { ...initialFlow, step: 'plan', page: pages - 1 };
+  if (param === 'fecha' || param === 'resumen' || param === 'final') {
+    // Una elección de ejemplo: el primer plan, dentro de dos días, a su primera hora.
+    const place = config.places[0];
+    const now = new Date();
+    const date = addDays(todayIn(now), 2);
+    const time = availableTimes(place, date, now)[0] ?? null;
+    const choice = { ...initialFlow.choice, placeId: place.id, date, time };
+    const step: Step = param === 'fecha' ? 'datetime' : param === 'resumen' ? 'summary' : 'farewell';
+    return { ...initialFlow, step, page: pages - 1, choice };
+  }
   return null;
 }
 
@@ -72,4 +85,13 @@ export function loadFlow(search: string, storage: Pick<Storage, 'getItem' | 'rem
     // sesión ilegible: se empieza de nuevo
   }
   return initialFlow;
+}
+
+/** Guarda el estado ya mismo (antes de salir hacia WhatsApp, por si el navegador cambia de página). */
+export function saveFlow(state: FlowState) {
+  try {
+    window.sessionStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } catch {
+    // sin almacenamiento: no pasa nada
+  }
 }

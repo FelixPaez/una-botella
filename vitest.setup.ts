@@ -1,2 +1,3 @@
-// Los tests de fechas y del cielo se calculan con la hora de Cuba.
-process.env.TZ = 'America/Havana';
+// Los tests corren en hora de Tokio a propósito: el plan, el cielo y la luna deben
+// calcularse con la hora de Santa Clara sea cual sea la zona del dispositivo.
+process.env.TZ = 'Asia/Tokyo';

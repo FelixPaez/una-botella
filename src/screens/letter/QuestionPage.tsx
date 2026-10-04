@@ -1,6 +1,8 @@
 import { animate, useMotionValue } from 'motion/react';
 import * as m from 'motion/react-m';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { whenIdle } from '../../lib/idle.ts';
+import { preloadPlanFlow } from '../planFlowLoader.ts';
 import { config } from '../../config.ts';
 import { feedback } from '../../design/feedback.ts';
 import { ease, spring, transition } from '../../design/motion.ts';
@@ -27,6 +29,9 @@ export function QuestionPage({ revealed }: { revealed: boolean }) {
   const yesRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLDivElement>(null);
   const yesScale = useMotionValue(1);
+
+  // Mientras ella decide, se precarga lo que viene después del sí.
+  useEffect(() => whenIdle(preloadPlanFlow), []);
 
   const { phrases, maxAttempts, allowGracefulDecline, declineLabel } = config.noButton;
   const still = allowGracefulDecline && dodges >= maxAttempts;

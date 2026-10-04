@@ -70,6 +70,11 @@ export function checkConfig(config: Config): string[] {
   if (Math.abs(config.location.latitude) > 90 || Math.abs(config.location.longitude) > 180) {
     add('location', 'latitud o longitud fuera de rango');
   }
+  try {
+    new Intl.DateTimeFormat('es', { timeZone: config.location.timeZone });
+  } catch {
+    add('location.timeZone', `"${config.location.timeZone}" no es una zona horaria (ej. "America/Havana")`);
+  }
 
   return problems;
 }

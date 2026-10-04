@@ -162,11 +162,25 @@ export function LetterScreen() {
       const id = window.setTimeout(() => setPhase('returning'), 0);
       return () => window.clearTimeout(id);
     }
-    flyScaleX.set(0.82);
-    flyScaleY.set(0.82);
-    animate(flyOpacity, 1, transition.enter);
-    animate(flyScaleX, 1, transition.enter);
-    animate(flyScaleY, 1, { ...transition.enter, onComplete: () => setPhase('returning') });
+    const start = () => {
+      flyScaleX.set(0.82);
+      flyScaleY.set(0.82);
+      animate(flyOpacity, 1, transition.enter);
+      animate(flyScaleX, 1, transition.enter);
+      animate(flyScaleY, 1, { ...transition.enter, onComplete: () => setPhase('returning') });
+    };
+    if (!document.hidden) {
+      start();
+      return;
+    }
+    // Ella está en WhatsApp: la despedida espera a que vuelva para que no se la pierda.
+    const onVisible = () => {
+      if (document.hidden) return;
+      document.removeEventListener('visibilitychange', onVisible);
+      window.setTimeout(start, 500);
+    };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => document.removeEventListener('visibilitychange', onVisible);
   }, [phase, reduced, flyOpacity, flyScaleX, flyScaleY]);
 
   // 5. Cuando la botella vuelve, la carta vuela hasta el cuello y entra.

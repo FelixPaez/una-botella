@@ -1,0 +1,675 @@
+/* El plan: postales, fecha y hora, y resumen. */
+
+@layer components {
+  /* ---------- Estructura común ---------- */
+
+  .screen-header {
+    max-width: 34rem;
+    margin: 0.5rem auto 0;
+    text-align: center;
+  }
+  .screen-actions {
+    position: sticky;
+    bottom: calc(-1 * (env(safe-area-inset-bottom) + 1.5rem));
+    z-index: 3;
+    display: flex;
+    justify-content: center;
+    gap: 0.75rem;
+    margin: 1.25rem calc(-1 * var(--gutter)) calc(-1 * (env(safe-area-inset-bottom) + 1.5rem));
+    padding: 1.25rem var(--gutter) calc(env(safe-area-inset-bottom) + 1.25rem);
+    background: linear-gradient(180deg, transparent, rgb(95 169 167 / 0.28) 60%, rgb(79 156 151 / 0.38));
+  }
+  /* Cada botón parte de su texto y crecen a la par: «Volver» cede sitio al principal. */
+  .screen-actions > * {
+    flex: 1 1 auto;
+    max-width: 18rem;
+    white-space: nowrap;
+  }
+  :root[data-mood='night'] .screen-actions {
+    background: linear-gradient(180deg, transparent, rgb(13 42 51 / 0.4) 60%, rgb(13 42 51 / 0.55));
+  }
+
+  /* ---------- Imagen de la postal ---------- */
+
+  .place-art {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    background: var(--color-mist);
+  }
+  .place-illustration,
+  .place-art__photo {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+  .place-art__photo {
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity var(--duration-enter) var(--ease-surface);
+  }
+  .place-art__photo.is-loaded {
+    opacity: 1;
+  }
+
+  /* Detalles vivos de las ilustraciones, solo en la postal activa y en el resumen. */
+  .place-card[data-active] .art-twinkle,
+  .summary-card .art-twinkle {
+    animation: art-twinkle 2.8s var(--ease-swell) infinite alternate;
+  }
+  .place-card[data-active] .art-steam,
+  .summary-card .art-steam {
+    animation: art-steam 3.2s var(--ease-swell) infinite;
+  }
+  .place-card[data-active] .art-glow,
+  .summary-card .art-glow {
+    animation: art-twinkle 2.4s var(--ease-swell) infinite alternate;
+  }
+  .place-card[data-active] .art-wave,
+  .summary-card .art-wave {
+    animation: art-wave 4s var(--ease-swell) infinite alternate;
+  }
+
+  /* ---------- Carrusel de postales ---------- */
+
+  .plan {
+    --card-w: min(78vw, 20.5rem);
+  }
+  .carousel-wrap {
+    position: relative;
+    margin: 0.75rem calc(-1 * var(--gutter)) 0;
+  }
+  .carousel {
+    display: flex;
+    gap: 1rem;
+    overflow-x: auto;
+    overflow-y: visible;
+    scroll-snap-type: x mandatory;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+    padding: 3.25rem calc(50% - var(--card-w) / 2) 1.5rem;
+  }
+  .carousel::-webkit-scrollbar {
+    display: none;
+  }
+  .place-card {
+    flex: 0 0 var(--card-w);
+    scroll-snap-align: center;
+    perspective: 1400px;
+    opacity: 0.72;
+    transform: scale(0.93);
+    transition:
+      transform var(--duration-enter) var(--ease-surface),
+      opacity var(--duration-enter) var(--ease-surface);
+  }
+  .place-card[data-active] {
+    opacity: 1;
+    transform: none;
+  }
+  .place-card__flip {
+    position: relative;
+    display: grid;
+    transform-style: preserve-3d;
+    border-radius: var(--radius-card);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .place-card__face {
+    grid-area: 1 / 1;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+  .place-card__back {
+    transform: rotateY(180deg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-soft);
+    color: var(--color-tide);
+  }
+  .place-card__question {
+    font-family: var(--font-serif);
+    font-size: 7rem;
+    line-height: 1;
+    font-weight: 600;
+    color: var(--color-deep);
+  }
+  .place-card__wave {
+    width: 9rem;
+  }
+  .place-card__lines {
+    width: 60%;
+    height: 2.5rem;
+    background: repeating-linear-gradient(180deg, transparent 0 0.75rem, rgb(31 78 90 / 0.18) 0.75rem calc(0.75rem + 1px));
+  }
+  .place-card__hint {
+    color: var(--color-ink-soft);
+  }
+  .place-card[data-selected] .paper::after {
+    box-shadow:
+      inset 0 0 0 2px rgb(59 135 146 / 0.55),
+      inset 0 1px 0 rgb(255 255 255 / 0.9);
+  }
+  .carousel-dots {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+  .carousel-dots > span {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    box-shadow: inset 0 0 0 1.5px var(--on-sea);
+    opacity: 0.5;
+    transition: opacity var(--duration-enter) var(--ease-surface), transform var(--duration-enter) var(--ease-surface);
+  }
+  .carousel-dots > span[data-active] {
+    background: var(--on-sea);
+    opacity: 0.9;
+    transform: scale(1.15);
+  }
+  .carousel-arrow {
+    position: absolute;
+    top: 50%;
+    z-index: 2;
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    margin-top: -1.375rem;
+    border-radius: 50%;
+    color: var(--color-deep);
+    box-shadow: var(--shadow-soft);
+  }
+  .carousel-arrow[data-dir='-1'] {
+    left: 0.5rem;
+  }
+  .carousel-arrow[data-dir='1'] {
+    right: 0.5rem;
+  }
+  .carousel-arrow:disabled {
+    opacity: 0.35;
+  }
+
+  /* Sello: hueco punteado + el sello que cae encima. */
+  .stamp-drop {
+    position: relative;
+    width: 64px;
+    height: 76px;
+  }
+  .stamp-drop__stamp {
+    position: absolute;
+    inset: 0;
+  }
+
+  @media (min-width: 1024px) {
+    .plan {
+      --card-w: 18.5rem;
+    }
+    .carousel-wrap {
+      margin: 1rem calc(-1 * var(--gutter)) 0;
+    }
+    .carousel {
+      --edge: max(4rem, calc((100vw - 60rem) / 2));
+      padding-inline: var(--edge);
+      scroll-padding-inline: var(--edge);
+      -webkit-mask-image: linear-gradient(90deg, transparent, #000 3rem, #000 calc(100% - 3rem), transparent);
+      mask-image: linear-gradient(90deg, transparent, #000 3rem, #000 calc(100% - 3rem), transparent);
+    }
+    .carousel-arrow[data-dir='-1'] {
+      left: calc(var(--gutter) + 1rem);
+    }
+    .carousel-arrow[data-dir='1'] {
+      right: calc(var(--gutter) + 1rem);
+    }
+    /* Como postales sobre una mesa: algo giradas; la que se señala se endereza. */
+    .place-card,
+    .place-card[data-active] {
+      opacity: 1;
+      transform: rotate(-1.6deg);
+    }
+    .place-card:nth-child(even) {
+      transform: rotate(1.3deg);
+    }
+    .place-card:nth-child(3n) {
+      transform: rotate(-0.8deg);
+    }
+    .place-card:hover,
+    .place-card:focus-within,
+    .place-card[data-selected] {
+      transform: translateY(-6px) rotate(0deg);
+    }
+    .carousel-dots {
+      display: none;
+    }
+  }
+
+  /* ---------- Fecha y hora ---------- */
+
+  .when__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.25rem;
+    max-width: 30rem;
+    margin: 1rem auto 0;
+  }
+  /* Sin esto la tira de días (más ancha que la pantalla) ensancha la columna. */
+  .when__days,
+  .when__times {
+    min-width: 0;
+  }
+  .day-strip {
+    display: flex;
+    gap: 0.5rem;
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    scroll-padding-inline: var(--gutter);
+    scrollbar-width: none;
+    margin: 0 calc(-1 * var(--gutter));
+    padding: 1.25rem var(--gutter) 1.5rem;
+  }
+  .day-strip::-webkit-scrollbar {
+    display: none;
+  }
+  .day {
+    position: relative;
+    flex: 0 0 auto;
+    scroll-snap-align: start;
+    min-width: 3.6rem;
+    border-radius: 1.1rem;
+    color: var(--color-deep);
+    transition: opacity var(--duration-enter) var(--ease-surface);
+  }
+  .day__float {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    justify-items: center;
+    gap: 0.15rem;
+    padding: 0.55rem 0.5rem 0.65rem;
+    border-radius: inherit;
+    background: rgb(255 255 255 / 0.82);
+    box-shadow:
+      inset 0 0 0 1px rgb(31 78 90 / 0.1),
+      var(--shadow-soft);
+  }
+  .day__month {
+    height: 0.8rem;
+    font-size: 0.625rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-tide);
+  }
+  .day__name {
+    font-size: var(--text-label);
+    font-weight: 600;
+    text-transform: capitalize;
+    color: var(--color-ink-soft);
+  }
+  .day__number {
+    font-family: var(--font-serif);
+    font-size: 1.5rem;
+    line-height: 1.1;
+    font-weight: 600;
+  }
+  .day__moon {
+    margin-top: 0.15rem;
+    color: var(--color-deep);
+  }
+  /* El reflejo bajo la boya: se estira cuando el día está elegido. */
+  .day__reflection {
+    position: absolute;
+    left: 15%;
+    right: 15%;
+    bottom: -0.6rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: radial-gradient(closest-side, rgb(20 58 69 / 0.28), transparent);
+    opacity: 0;
+    transform: scaleX(0.6);
+    transition:
+      opacity var(--duration-enter) var(--ease-surface),
+      transform var(--duration-enter) var(--ease-surface);
+  }
+  .day[data-selected] .day__float {
+    background: var(--color-deep);
+    color: var(--color-foam);
+    animation: day-buoy 2.6s var(--ease-swell) 0.5s infinite alternate;
+  }
+  .day[data-selected] .day__name,
+  .day[data-selected] .day__month {
+    color: var(--color-mint);
+  }
+  .day[data-selected] .day__moon {
+    --moon-lit: #eef8f4;
+    --moon-shadow: rgb(238 248 244 / 0.16);
+    color: var(--color-foam);
+  }
+  .day[data-selected] .day__reflection {
+    opacity: 1;
+    transform: scaleX(1.1);
+  }
+  .day[data-dim] {
+    opacity: 0.6;
+  }
+  .day:disabled {
+    opacity: 0.32;
+    cursor: not-allowed;
+  }
+  .day:disabled .day__number {
+    text-decoration: line-through;
+    text-decoration-thickness: 1px;
+  }
+
+  .tide-table {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 0.6rem 0.5rem;
+    padding: 1rem 1.25rem 1.5rem;
+    border-radius: var(--radius-card);
+  }
+  .tide-table__head {
+    text-align: center;
+    color: var(--on-sea-soft);
+  }
+  .day--compact {
+    min-width: 0;
+  }
+
+  .when__caption {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 1.5rem;
+    font-size: var(--text-small);
+    font-weight: 600;
+  }
+  .when__caption-moon {
+    --moon-lit: currentColor;
+    --moon-shadow: transparent;
+  }
+  .when__quip {
+    margin-top: 0.25rem;
+    text-align: center;
+    font-family: var(--font-serif);
+    font-style: italic;
+  }
+  .card-panel {
+    border-radius: var(--radius-card);
+    padding: 1.4rem 1.25rem 1.25rem;
+    box-shadow: var(--shadow-soft);
+  }
+  .when__groups {
+    display: grid;
+    gap: 1rem;
+    margin-top: 0.9rem;
+  }
+  .when__group-label {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: var(--text-small);
+    font-weight: 600;
+    color: var(--color-ink-soft);
+  }
+  .when__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+  }
+
+  /* La nota: renglones de carta y cursiva. 16 px como mínimo: iOS no hace zoom. */
+  .note {
+    position: relative;
+    display: block;
+    margin-top: 1.4rem;
+  }
+  .note__field {
+    display: block;
+    width: 100%;
+    margin-top: 0.5rem;
+    padding: 0 0.25rem;
+    border: 0;
+    resize: none;
+    background: repeating-linear-gradient(
+      180deg,
+      transparent 0 calc(1.75rem - 1px),
+      rgb(31 78 90 / 0.2) calc(1.75rem - 1px) 1.75rem
+    );
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-size: max(1rem, 1.0625rem);
+    line-height: 1.75rem;
+    color: var(--color-deep);
+    outline: none;
+  }
+  .note__field::placeholder {
+    color: rgb(69 110 121 / 0.75);
+  }
+  .note__field:focus-visible {
+    box-shadow: 0 2px 0 var(--color-tide);
+  }
+  .note__count {
+    position: absolute;
+    right: 0;
+    top: 0;
+    font-size: var(--text-label);
+    color: var(--color-ink-soft);
+  }
+
+  @media (min-width: 1024px) {
+    .when__grid {
+      max-width: 64rem;
+      grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+      align-items: start;
+      gap: 2.5rem;
+    }
+    .tide-table {
+      background: rgb(255 255 255 / 0.28);
+    }
+  }
+
+  /* ---------- Resumen ---------- */
+
+  .summary-card {
+    position: relative;
+    display: grid;
+    gap: 0.25rem;
+    max-width: 26rem;
+    margin: 1.25rem auto 0;
+    padding: 0.75rem;
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-float);
+  }
+  .summary-card__art {
+    position: relative;
+    display: block;
+    aspect-ratio: 5 / 4;
+    overflow: hidden;
+    border-radius: 1rem;
+  }
+  .summary-card__side {
+    position: relative;
+    padding: 1rem 0.5rem 0.5rem;
+  }
+  .summary-card__stamps {
+    position: absolute;
+    top: -2.6rem;
+    right: 0.25rem;
+    width: 64px;
+    height: 76px;
+  }
+  /* En móvil el matasellos cae sobre el borde de la imagen: las ondas no tachan el título.
+     La tinta va encima del sello, pero la fecha queda fuera de él para leerse bien. */
+  .summary-card__postmark {
+    position: absolute;
+    z-index: 2;
+    top: -2.6rem;
+    right: 2.4rem;
+    color: var(--color-deep);
+    mix-blend-mode: multiply;
+    pointer-events: none;
+  }
+  .summary-card__title {
+    padding-right: 7rem;
+    font-family: var(--font-serif);
+    font-size: var(--text-letter);
+    line-height: 1.2;
+    font-weight: 600;
+    color: var(--color-deep);
+  }
+  .summary-card__tagline {
+    margin-top: 0.3rem;
+    font-family: var(--font-serif);
+    font-style: italic;
+    color: var(--color-ink-soft);
+  }
+  .address {
+    display: grid;
+    margin-top: 1rem;
+  }
+  .address__line {
+    display: grid;
+    grid-template-columns: 4rem minmax(0, 1fr);
+    align-items: center;
+    gap: 0.5rem;
+    border-bottom: 1px dashed rgb(31 78 90 / 0.2);
+  }
+  .address__line dt {
+    color: var(--color-tide);
+  }
+  .address__value {
+    display: flex;
+    width: 100%;
+    min-height: 2.75rem;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    text-align: left;
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-size: 1.0625rem;
+    color: var(--color-deep);
+  }
+  .address__value svg {
+    flex: none;
+    color: var(--color-tide);
+    opacity: 0.7;
+  }
+  .address__value.is-muted {
+    color: var(--color-ink-soft);
+  }
+  .summary__actions {
+    display: grid;
+    gap: 0.75rem;
+    max-width: 26rem;
+    margin: 1.5rem auto 0;
+  }
+  .summary__copy {
+    min-height: 2.75rem;
+    font-size: var(--text-small);
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    color: var(--on-sea);
+  }
+
+  /* Escritorio: postal horizontal, como las de verdad. */
+  @media (min-width: 1024px) {
+    .summary-card {
+      max-width: 52rem;
+      grid-template-columns: 1.05fr 1fr;
+      gap: 1.5rem;
+      padding: 1rem;
+    }
+    .summary-card__side {
+      padding: 1.5rem 1rem 1rem 0;
+      border-left: 1px solid rgb(31 78 90 / 0.12);
+      padding-left: 1.5rem;
+    }
+    /* La imagen ocupa todo el alto de su mitad de la postal. */
+    .summary-card__art {
+      aspect-ratio: auto;
+      min-height: 18rem;
+    }
+    .summary-card__stamps {
+      top: 1rem;
+      right: 1rem;
+    }
+    .summary-card__postmark {
+      top: 0.6rem;
+    }
+    .summary-card__title {
+      margin-top: 7rem;
+      padding-right: 0;
+    }
+    .summary__actions {
+      grid-template-columns: 1.4fr 1fr;
+      max-width: 52rem;
+    }
+    .summary__copy {
+      grid-column: 1 / -1;
+      grid-row: 2;
+    }
+  }
+}
+
+@keyframes art-twinkle {
+  from {
+    opacity: 0.45;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes art-steam {
+  0% {
+    transform: translate3d(0, 6px, 0);
+    opacity: 0;
+  }
+  40% {
+    opacity: 0.9;
+  }
+  100% {
+    transform: translate3d(0, -10px, 0);
+    opacity: 0;
+  }
+}
+@keyframes art-wave {
+  from {
+    transform: translate3d(-6px, 0, 0);
+  }
+  to {
+    transform: translate3d(6px, 2px, 0);
+  }
+}
+@keyframes day-buoy {
+  from {
+    transform: translate3d(0, -1.5px, 0);
+  }
+  to {
+    transform: translate3d(0, 2px, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .art-twinkle,
+  .art-steam,
+  .art-glow,
+  .art-wave,
+  .day[data-selected] .day__float {
+    animation: none !important;
+  }
+  .place-card,
+  .place-card[data-active] {
+    transform: none;
+  }
+}

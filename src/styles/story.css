@@ -393,11 +393,18 @@
     inset: 0;
     pointer-events: none;
   }
+  .closing__text h2 {
+    text-wrap: balance;
+  }
   @media (min-width: 1024px) {
     .celebration__text,
     .closing__text {
       margin-top: 20vh;
       max-width: 40rem;
+    }
+    /* «Nos vemos el martes / 6 de octubre»: dos renglones, no tres. */
+    .closing__text {
+      max-width: 52rem;
     }
   }
 

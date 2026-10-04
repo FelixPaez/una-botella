@@ -2,14 +2,16 @@ import { describe, expect, it } from 'vitest';
 import { moodAt } from './mood.ts';
 import { moonIllumination, moonLitPath, moonPhase, moonPhaseName } from './moon.ts';
 import { sunTimes } from './sun.ts';
+import { zonedInstant } from './zone.ts';
 
-// Santa Clara, Cuba. Los tests corren con TZ=America/Havana (ver vitest.setup.ts).
+// Santa Clara, Cuba. El dispositivo está en Tokio (vitest.setup.ts).
 const LAT = 22.41;
 const LON = -79.96;
 const MINUTE = 60_000;
+const TZ = 'America/Havana';
 
 const localTime = (date: Date) =>
-  new Intl.DateTimeFormat('es', { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(date);
+  new Intl.DateTimeFormat('es', { timeZone: TZ, hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(date);
 
 describe('puesta de sol en Santa Clara', () => {
   it('el 4 de octubre de 2026 es hacia las 19:04 (UTC−4)', () => {
@@ -63,7 +65,7 @@ describe('fase lunar', () => {
 });
 
 describe('hora del cielo', () => {
-  const at = (h: number, m = 0) => moodAt(new Date(2026, 9, 4, h, m), LAT, LON);
+  const at = (h: number, m = 0) => moodAt(zonedInstant('2026-10-04', `${h}:${m}`, TZ), LAT, LON, TZ);
   it('sigue la puesta de sol real', () => {
     expect(at(5, 0)).toBe('night');
     expect(at(8, 30)).toBe('morning');

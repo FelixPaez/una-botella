@@ -26,7 +26,7 @@ export function useScene(): SceneContextValue {
   return value;
 }
 
-const realMood = () => moodAt(new Date(), config.location.latitude, config.location.longitude);
+const realMood = () => moodAt(new Date(), config.location.latitude, config.location.longitude, config.location.timeZone);
 
 /** Hora del cielo según la hora real de su móvil (se revisa cada minuto). */
 export function useRealMood(): Mood {

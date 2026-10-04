@@ -3,6 +3,7 @@ import { config } from '../config.ts';
 import type { Config, Place } from '../config.types.ts';
 import { initialFlow } from '../state/flow.ts';
 import {
+  addDays,
   availableTimes,
   buildDays,
   daypartOf,
@@ -14,14 +15,16 @@ import {
   quipFor,
 } from './dates.ts';
 import { buildMessage, whatsappUrl } from './whatsapp.ts';
+import { isoDateIn, zonedInstant } from './zone.ts';
 
-// TZ = America/Havana (vitest.setup.ts).
+// El dispositivo está en Tokio (vitest.setup.ts); las horas son las de Santa Clara.
+const havana = (iso: string, time: string) => zonedInstant(iso, time, 'America/Havana');
 const schedule: Config['schedule'] = { ...config.schedule, excludedWeekdays: [], excludedDates: [] };
 const sunsetPlace = config.places.find((p) => p.times === 'sunset')!;
 const cafe: Place = { ...config.places[2], times: ['09:30', '10:30', '16:00'] };
 
 describe('días', () => {
-  const now = new Date(2026, 9, 4, 10, 0); // domingo 4 de octubre, 10:00
+  const now = havana('2026-10-04', '10:00'); // domingo 4 de octubre, 10:00 en Cuba (23:00 en Tokio)
 
   it('empieza hoy y dura daysAhead días', () => {
     const days = buildDays(now, cafe, { ...schedule, daysAhead: 14 });
@@ -32,7 +35,7 @@ describe('días', () => {
   });
 
   it('cruza el cambio de hora de Cuba (1 de noviembre) sin saltarse ni repetir días', () => {
-    const days = buildDays(new Date(2026, 9, 30, 9, 0), cafe, { ...schedule, daysAhead: 5 });
+    const days = buildDays(havana('2026-10-30', '09:00'), cafe, { ...schedule, daysAhead: 5 });
     expect(days.map((d) => d.iso)).toEqual(['2026-10-30', '2026-10-31', '2026-11-01', '2026-11-02', '2026-11-03']);
   });
 
@@ -49,9 +52,21 @@ describe('días', () => {
   });
 
   it('si hoy no queda ningún horario, el día aparece deshabilitado', () => {
-    const late = new Date(2026, 9, 4, 15, 0);
+    const late = havana('2026-10-04', '15:00'); // en Tokio ya es lunes
     const [today] = buildDays(late, cafe, schedule);
-    expect(today).toMatchObject({ isToday: true, available: false, reason: 'ya no quedan horarios' });
+    expect(today).toMatchObject({ iso: '2026-10-04', isToday: true, available: false, reason: 'ya no quedan horarios' });
+  });
+});
+
+describe('zona horaria del lugar', () => {
+  it('convierte la hora de Santa Clara en el instante correcto, antes y después del cambio de hora', () => {
+    expect(havana('2026-10-04', '18:00').toISOString()).toBe('2026-10-04T22:00:00.000Z'); // UTC−4
+    expect(havana('2026-11-02', '18:00').toISOString()).toBe('2026-11-02T23:00:00.000Z'); // UTC−5
+  });
+
+  it('el día de hoy es el de allí, no el del dispositivo', () => {
+    expect(isoDateIn(new Date('2026-10-05T03:00:00Z'), 'America/Havana')).toBe('2026-10-04');
+    expect(addDays('2026-10-31', 2)).toBe('2026-11-02');
   });
 });
 
@@ -80,7 +95,7 @@ describe('horarios', () => {
   });
 
   it('guiño de luna llena el 26 de octubre', () => {
-    const days = buildDays(new Date(2026, 9, 20, 9, 0), cafe, schedule);
+    const days = buildDays(havana('2026-10-20', '09:00'), cafe, schedule);
     expect(quipFor(days.find((d) => d.iso === '2026-10-26')!)).toBe(config.quips.fullMoon);
   });
 });
