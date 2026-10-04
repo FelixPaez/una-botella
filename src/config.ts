@@ -241,4 +241,14 @@ export const config: Config = {
     startMuted: false, // true = empieza en silencio y ella decide
     volume: 0.7,
   },
+
+  // Guarda lo ya descargado para reabrir al instante y aguantar cortes de conexión.
+  // false = se desinstala de los móviles que ya lo tenían (al abrir de nuevo el enlace).
+  serviceWorker: true,
+
+  // Si se corta la conexión justo al cargar las postales.
+  connection: {
+    lost: 'La marea se llevó la conexión un momento.',
+    retry: 'Volver a intentarlo',
+  },
 };

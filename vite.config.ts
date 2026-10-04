@@ -43,13 +43,14 @@ function metaTags(): Plugin {
         meta('twitter:card', 'summary_large_image'),
       ];
       if (siteUrl) tags.push(og('og:url', siteUrl));
-      // La imagen solo se anuncia cuando existe (se crea en la fase de pulido).
+      // La vista previa de WhatsApp: solo se anuncia si la imagen existe.
       if (siteUrl && existsSync('public/og-image.jpg')) {
         tags.push(
           og('og:image', `${siteUrl}og-image.jpg`),
+          og('og:image:type', 'image/jpeg'),
           og('og:image:width', '1200'),
           og('og:image:height', '630'),
-          og('og:image:alt', 'Una botella flotando en el mar en calma'),
+          og('og:image:alt', 'Una botella con un mensaje flotando en el mar al atardecer'),
         );
       }
       return tags;

@@ -42,8 +42,15 @@ Descartadas: vibración en iPhone con el truco de `<input switch>`; «sin sonido
 - Muchos móviles no actualizan Chrome (sin Google Play): el build apunta a Chrome 88+, Safari/iOS 15+, Firefox 90+.
   Tailwind 4 agrupa el CSS en `@layer`, que esos navegadores ignorarían entero; un paso de PostCSS lo traduce a especificidad normal.
 - Cero peticiones a otros dominios (fuentes autoalojadas, sin CDN).
-- Presupuesto: JS inicial < 150 KB gzip (hoy ~106 KB), fuentes ≤ 120 KB (hoy 117 KB, 72 KB precargados).
+- Presupuesto: JS inicial < 150 KB gzip (hoy ~129 KB, más ~8 KB del plan precargado durante la pregunta),
+  fuentes ≤ 120 KB (hoy 117 KB, 72 KB precargados).
 - Cuba atrasa la hora el primer domingo de noviembre: las fechas se construyen por calendario, con test.
+- Todas las horas se calculan en la zona del lugar (`America/Havana`), no en la del dispositivo:
+  los tests corren a propósito con el reloj en Tokio.
+- Service worker propio (`public/sw.js`): HTML siempre primero de la red, archivos con hash desde la caché,
+  sin precarga. Si la caché del navegador falla, todo sigue por la red. `serviceWorker: false` lo desinstala.
+- Si un archivo del plan no llega (versión nueva publicada a mitad de la visita), se recarga una vez
+  y se sigue donde iba; si no hay conexión, aviso con «Volver a intentarlo» en vez de pantalla en blanco.
 
 ## Sistema de diseño
 
@@ -87,7 +94,11 @@ question ─Sí─▶ celebration ─▶ plan ⇄ datetime ⇄ summary ─WhatsA
 |---|---|---|
 | 0 | Plan | ✅ aprobado |
 | 1 | Base, sistema de diseño, mar persistente, barquito, sonido, config.ts, layout responsive, despliegue | ✅ aprobada |
-| 2 | Intro (botella), apertura y carta con sus gestos | ✅ entregada, pendiente de OK |
-| 3 | La pregunta (botón No), «Mejor otro día» y celebración | — |
-| 4 | Postales, fecha y hora, mar según la hora, resumen con matasellos, WhatsApp y final | — |
-| 5 | Lighthouse, og:image, reduced motion, 360 px, service worker y README completo | — |
+| 2 | Intro (botella), apertura y carta con sus gestos | ✅ aprobada |
+| 3 | La pregunta (botón No), «Mejor otro día» y celebración | ✅ hecha |
+| 4 | Postales, fecha y hora, mar según la hora, resumen con matasellos, WhatsApp y final | ✅ hecha |
+| 5 | Lighthouse, og:image, reduced motion, 360 px, service worker y README completo | ✅ hecha |
+| — | Contenido real: nombres, número, carta, lugares y fotos | ⏳ pendiente del autor |
+
+Lighthouse (build de producción): móvil 96 / 100 / 100 (rendimiento, accesibilidad, buenas prácticas),
+escritorio 100 / 100 / 100. SEO 54 a propósito (`noindex`).

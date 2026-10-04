@@ -127,4 +127,7 @@ export type Config = {
     /** Volumen general, de 0 a 1. */
     volume: number;
   };
+  /** Caché propia para reabrir rápido y sin red; false la desinstala. */
+  serviceWorker: boolean;
+  connection: { lost: string; retry: string };
 };

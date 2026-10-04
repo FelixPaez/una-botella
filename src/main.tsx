@@ -4,6 +4,7 @@ import './styles/index.css';
 import { App } from './App.tsx';
 import { config } from './config.ts';
 import { checkConfig, findTodos } from './lib/configCheck.ts';
+import { setupServiceWorker } from './lib/serviceWorker.ts';
 import { initSound } from './sound/index.ts';
 
 if (import.meta.env.DEV) {
@@ -14,6 +15,9 @@ if (import.meta.env.DEV) {
 }
 
 initSound();
+
+// Solo en la web publicada: en desarrollo una caché solo estorbaría.
+if (import.meta.env.PROD) setupServiceWorker(config.serviceWorker);
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

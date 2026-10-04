@@ -477,6 +477,20 @@
     }
   }
 
+  /* ---------- Sin conexión ---------- */
+
+  .retry {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1.25rem;
+    min-height: 60dvh;
+    max-width: 24rem;
+    margin: 0 auto;
+    text-align: center;
+  }
+
   /* ---------- Resumen ---------- */
 
   .summary-card {
