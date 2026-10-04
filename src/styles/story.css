@@ -151,7 +151,7 @@
     height: 15px;
     border-radius: 8px;
     background: linear-gradient(180deg, #ddd2bd 0%, #fbf8f0 45%, #f3ede1 70%, #e2d8c4 100%);
-    box-shadow: 0 4px 8px -4px rgb(20 58 69 / 0.35);
+    box-shadow: 0 4px 8px -4px rgb(15 51 82 / 0.35);
   }
   .letter__track {
     position: absolute;
@@ -171,7 +171,7 @@
     height: 100%;
     border-radius: 15px;
     background: linear-gradient(180deg, #d6c9ae 0%, #f3ecdd 20%, #fffdf6 46%, #f1e9d8 72%, #c8b999 100%);
-    box-shadow: 0 8px 16px -10px rgb(20 58 69 / 0.5);
+    box-shadow: 0 8px 16px -10px rgb(15 51 82 / 0.5);
   }
   .roll__cap {
     position: absolute;
@@ -348,7 +348,7 @@
     color: var(--color-deep);
     background: rgb(255 255 255 / 0.85);
     box-shadow:
-      inset 0 0 0 1px rgb(31 78 90 / 0.14),
+      inset 0 0 0 1px rgb(24 70 106 / 0.14),
       var(--shadow-soft);
     touch-action: none;
     -webkit-user-select: none;
@@ -428,9 +428,9 @@
     border-radius: 50%;
     background: radial-gradient(
       closest-side,
-      rgb(222 240 240 / 0.98) 0%,
-      rgb(205 231 238 / 0.9) 45%,
-      rgb(205 231 238 / 0) 100%
+      rgb(224 239 247 / 0.98) 0%,
+      rgb(205 228 242 / 0.9) 45%,
+      rgb(205 228 242 / 0) 100%
     );
     animation: mist-drift 8s var(--ease-swell) infinite alternate;
   }
@@ -453,7 +453,7 @@
     position: absolute;
     inset: 0;
     border-radius: 50%;
-    box-shadow: inset 0 0 0 3.5px rgb(31 78 90 / 0.12);
+    box-shadow: inset 0 0 0 3.5px rgb(24 70 106 / 0.12);
   }
   .hold__half {
     position: absolute;
@@ -492,7 +492,7 @@
     background: radial-gradient(circle at 35% 30%, #ffffff, var(--color-mist) 75%);
     box-shadow:
       var(--shadow-stamp),
-      inset 0 0 0 1px rgb(31 78 90 / 0.08);
+      inset 0 0 0 1px rgb(24 70 106 / 0.08);
   }
 }
 

@@ -41,15 +41,15 @@ export function Stamp({ children, label = 'CORREO MARINO', className = '' }: Sta
       </defs>
       <g mask={`url(#${id})`}>
         <rect width={W} height={H} fill="#fdfcf7" />
-        <rect x={6} y={6} width={52} height={46} rx={1.5} fill="#dceef5" />
+        <rect x={6} y={6} width={52} height={46} rx={1.5} fill="#d9ecf7" />
         {children ?? (
           <g>
             <circle cx={40} cy={22} r={7} fill="#f1cb86" />
-            <path d="M6 36c6-4 11-4 17 0s11 4 17 0 12-4 18 0v16H6z" fill="#9fdcd1" />
-            <path d="M6 42c6-3.5 11-3.5 17 0s11 3.5 17 0 12-3.5 18 0v10H6z" fill="#6fc0b1" />
+            <path d="M6 36c6-4 11-4 17 0s11 4 17 0 12-4 18 0v16H6z" fill="#9ad3ea" />
+            <path d="M6 42c6-3.5 11-3.5 17 0s11 3.5 17 0 12-3.5 18 0v10H6z" fill="#5bb3d9" />
           </g>
         )}
-        <rect x={6} y={6} width={52} height={46} rx={1.5} fill="none" stroke="#1f4e5a" strokeOpacity={0.18} />
+        <rect x={6} y={6} width={52} height={46} rx={1.5} fill="none" stroke="#18466a" strokeOpacity={0.18} />
         <text
           x={W / 2}
           y={65}
@@ -58,7 +58,7 @@ export function Stamp({ children, label = 'CORREO MARINO', className = '' }: Sta
           fontWeight={700}
           fontSize={5.6}
           letterSpacing={1.1}
-          fill="#1f4e5a"
+          fill="#18466a"
         >
           {label}
         </text>

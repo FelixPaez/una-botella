@@ -48,22 +48,29 @@
   opacity: 1;
 }
 .sky--morning {
-  background: linear-gradient(180deg, #cde6f1 0%, #e1f0f3 calc(var(--horizon) * 0.62), #f4fbf9 var(--horizon));
+  background: linear-gradient(
+    180deg,
+    #b9d9f0 0%,
+    #dcebf6 calc(var(--horizon) * 0.62),
+    #f8f1e8 calc(var(--horizon) * 0.94),
+    #fbeedd var(--horizon)
+  );
 }
 .sky--day {
-  background: linear-gradient(180deg, #bfe0ee 0%, #d9edf4 calc(var(--horizon) * 0.58), #eef8f6 var(--horizon));
+  background: linear-gradient(180deg, #9fcff0 0%, #cbe5f6 calc(var(--horizon) * 0.58), #ecf6fc var(--horizon));
 }
 .sky--sunset {
   background: linear-gradient(
     180deg,
-    #c9dbe6 0%,
-    #e4e2dc calc(var(--horizon) * 0.5),
-    #f2dcb6 calc(var(--horizon) * 0.9),
-    #f5d4a0 var(--horizon)
+    #9db8de 0%,
+    #cfc6e0 calc(var(--horizon) * 0.45),
+    #f1c9bd calc(var(--horizon) * 0.78),
+    #f8c792 calc(var(--horizon) * 0.95),
+    #fad08f var(--horizon)
   );
 }
 .sky--night {
-  background: linear-gradient(180deg, #0d2a33 0%, #133845 calc(var(--horizon) * 0.62), #1f4e5a var(--horizon));
+  background: linear-gradient(180deg, #071a2e 0%, #0d2a47 calc(var(--horizon) * 0.62), #1a4570 var(--horizon));
 }
 
 .sun {
@@ -128,7 +135,7 @@
   width: 120px;
   height: 120px;
   margin: -60px 0 0 -60px;
-  color: #eef8f4;
+  color: #eef6fb;
   opacity: 0;
   transform: translate3d(0, 14px, 0);
   transition:
@@ -143,11 +150,11 @@
   position: absolute;
   inset: 0;
   border-radius: 50%;
-  background: radial-gradient(circle, rgb(203 236 226 / 0.3) 0%, rgb(203 236 226 / 0.08) 40%, transparent 70%);
+  background: radial-gradient(circle, rgb(205 232 245 / 0.3) 0%, rgb(205 232 245 / 0.08) 40%, transparent 70%);
 }
 .moon__icon {
-  --moon-lit: #eef8f4;
-  --moon-shadow: rgb(238 248 244 / 0.12);
+  --moon-lit: #eef6fb;
+  --moon-shadow: rgb(238 246 251 / 0.12);
   position: absolute;
   left: 50%;
   top: 50%;
@@ -168,8 +175,8 @@
 .star {
   position: absolute;
   border-radius: 50%;
-  background: #f4fbf9;
-  box-shadow: 0 0 4px rgb(244 251 249 / 0.7);
+  background: #f5fafd;
+  box-shadow: 0 0 4px rgb(245 250 253 / 0.7);
   animation: star-twinkle 3s var(--ease-swell) infinite alternate;
 }
 
@@ -234,18 +241,83 @@
   transition: opacity var(--duration-ambient) var(--ease-swell);
 }
 .water-tint--morning {
-  background: rgb(244 251 249 / 0.22);
+  background: linear-gradient(180deg, rgb(251 238 221 / 0.32) 0%, rgb(245 250 253 / 0.12) 40%, rgb(245 250 253 / 0) 70%);
 }
+/* Al atardecer el agua refleja el cielo: lila y rosa cerca del horizonte, azul hondo abajo. */
 .water-tint--sunset {
   background: linear-gradient(
     180deg,
-    rgb(241 203 134 / 0.4) 0%,
-    rgb(241 203 134 / 0.12) 30%,
-    rgb(241 203 134 / 0) 60%
+    rgb(214 160 190 / 0.42) 0%,
+    rgb(150 130 190 / 0.22) 26%,
+    rgb(40 70 140 / 0.12) 60%,
+    rgb(20 50 110 / 0.22) 100%
   );
 }
 .water-tint--night {
-  background: linear-gradient(180deg, rgb(20 58 69 / 0.58) 0%, rgb(13 42 51 / 0.74) 100%);
+  background: linear-gradient(180deg, rgb(8 30 58 / 0.52) 0%, rgb(5 22 44 / 0.7) 100%);
+}
+
+/* El reflejo del sol (o de la luna) en el agua: una estela que se abre hacia nosotros. */
+.sun-path {
+  position: absolute;
+  top: 0;
+  left: 72%;
+  width: min(46vw, 320px);
+  height: 62%;
+  margin-left: calc(min(46vw, 320px) / -2);
+  opacity: 0;
+  transition: opacity var(--duration-ambient) var(--ease-swell);
+}
+.sun-path--day {
+  background: radial-gradient(ellipse 34% 100% at 50% 0%, rgb(255 255 255 / 0.4), rgb(255 255 255 / 0) 72%);
+}
+.sun-path--sunset {
+  background: radial-gradient(
+    ellipse 40% 100% at 50% 0%,
+    rgb(255 214 150 / 0.85),
+    rgb(250 180 130 / 0.35) 45%,
+    rgb(250 180 130 / 0) 78%
+  );
+}
+.sun-path--moon {
+  left: 78%;
+  background: radial-gradient(ellipse 26% 100% at 50% 0%, rgb(220 236 250 / 0.3), rgb(220 236 250 / 0) 70%);
+}
+.sea[data-mood='morning'] .sun-path--day {
+  opacity: 0.7;
+}
+.sea[data-mood='day'] .sun-path--day,
+.sea[data-mood='sunset'] .sun-path--sunset,
+.sea[data-mood='night'] .sun-path--moon {
+  opacity: 1;
+}
+
+/* Rayos de luz bajo la superficie, de día: el agua se ve clara y honda. */
+.light-rays {
+  position: absolute;
+  inset: 45% 0 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: opacity var(--duration-ambient) var(--ease-swell);
+}
+.sea[data-mood='morning'] .light-rays,
+.sea[data-mood='day'] .light-rays {
+  opacity: 1;
+}
+.sea[data-mood='sunset'] .light-rays {
+  opacity: 0.45;
+}
+/* Bordes difusos a los lados (degradado) y arriba y abajo (máscara): luz, no cristal. */
+.light-ray {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  background: linear-gradient(90deg, rgb(255 255 255 / 0), rgb(255 255 255 / 0.26) 50%, rgb(255 255 255 / 0));
+  -webkit-mask-image: linear-gradient(180deg, transparent, #000 32%, rgb(0 0 0 / 0.5) 62%, transparent 95%);
+  mask-image: linear-gradient(180deg, transparent, #000 32%, rgb(0 0 0 / 0.5) 62%, transparent 95%);
+  transform: skewX(-14deg);
+  transform-origin: 50% 0;
+  animation: ray-breathe 7s var(--ease-swell) infinite alternate;
 }
 .sea[data-mood='morning'] .water-tint--morning,
 .sea[data-mood='sunset'] .water-tint--sunset,
@@ -430,6 +502,14 @@
     opacity: 1;
   }
 }
+@keyframes ray-breathe {
+  from {
+    opacity: 0.25;
+  }
+  to {
+    opacity: 1;
+  }
+}
 @keyframes glint-twinkle {
   0%,
   100% {
@@ -475,5 +555,8 @@
   }
   .glint {
     opacity: 0.6;
+  }
+  .light-ray {
+    opacity: 0.55;
   }
 }

@@ -13,9 +13,9 @@ export function RolledLetter({ ribbon }: { ribbon: MotionValue<number> }) {
       <span className="roll__cap roll__cap--right" />
       <m.span className="roll__ribbon" style={{ y, rotate, opacity }}>
         <svg viewBox="0 0 26 44" width="26" height="44">
-          <rect x="9.5" y="7" width="7" height="31" fill="#3b8792" />
-          <path d="M13 8c-5.6-6.4-12.4-5.2-10 .3 1.7 3.6 6.6 1.8 10-.3zm0 0c5.6-6.4 12.4-5.2 10 .3-1.7 3.6-6.6 1.8-10-.3z" fill="#3b8792" />
-          <path d="M11.4 8.6 8 15M14.6 8.6 18 15" stroke="#2c6f79" strokeWidth="2" strokeLinecap="round" />
+          <rect x="9.5" y="7" width="7" height="31" fill="#26729c" />
+          <path d="M13 8c-5.6-6.4-12.4-5.2-10 .3 1.7 3.6 6.6 1.8 10-.3zm0 0c5.6-6.4 12.4-5.2 10 .3-1.7 3.6-6.6 1.8-10-.3z" fill="#26729c" />
+          <path d="M11.4 8.6 8 15M14.6 8.6 18 15" stroke="#20668f" strokeWidth="2" strokeLinecap="round" />
         </svg>
       </m.span>
     </div>

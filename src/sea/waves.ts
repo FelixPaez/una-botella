@@ -55,12 +55,16 @@ export type BandSpec = {
   seed: number;
 };
 
-/** De lejos a cerca: menta, aguamarina, laguna, verde mar. */
+/**
+ * De lejos a cerca, como el mar del Caribe visto desde la orilla: azul hondo en el
+ * horizonte (lo que marca la línea contra el cielo), cada vez más turquesa hacia
+ * nosotros, y bajo la superficie se oscurece con la profundidad.
+ */
 export const BANDS: BandSpec[] = [
-  { id: 'far', top: 0, amp: 3, wavelength: 120, drift: 46, bob: 's', bobDuration: 7.3, colors: ['#c9ebe4', '#bee5de'], foam: 0.5, depth: 0.15, seed: 1 },
-  { id: 'mid', top: 0.07, amp: 6, wavelength: 180, drift: 34, bob: 's', bobDuration: 6.1, colors: ['#ace0d8', '#9ed8d0'], foam: 0.42, depth: 0.35, seed: 2 },
-  { id: 'near', top: 0.2, amp: 9, wavelength: 250, drift: 25, bob: 'm', bobDuration: 5.3, colors: ['#95d1d8', '#87c6d0'], foam: 0.45, depth: 0.6, seed: 3 },
-  { id: 'front', top: 0.42, amp: 13, wavelength: 340, drift: 18, bob: 'l', bobDuration: 4.7, colors: ['#7ec5bd', '#5fa9a7'], foam: 0.55, depth: 1, seed: 4 },
+  { id: 'far', top: 0, amp: 3, wavelength: 120, drift: 46, bob: 's', bobDuration: 7.3, colors: ['#3d86bb', '#4790c2'], foam: 0.38, depth: 0.15, seed: 1 },
+  { id: 'mid', top: 0.07, amp: 6, wavelength: 180, drift: 34, bob: 's', bobDuration: 6.1, colors: ['#4f9fcf', '#57a7d4'], foam: 0.42, depth: 0.35, seed: 2 },
+  { id: 'near', top: 0.2, amp: 9, wavelength: 250, drift: 25, bob: 'm', bobDuration: 5.3, colors: ['#5fb3dc', '#66b9df'], foam: 0.5, depth: 0.6, seed: 3 },
+  { id: 'front', top: 0.42, amp: 13, wavelength: 340, drift: 18, bob: 'l', bobDuration: 4.7, colors: ['#72c4e4', '#3f93c6'], foam: 0.7, depth: 1, seed: 4 },
 ];
 
 /** Relleno extra bajo la cresta para que el vaivén nunca deje ver un hueco. */

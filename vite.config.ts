@@ -50,7 +50,7 @@ function metaTags(): Plugin {
           og('og:image:type', 'image/jpeg'),
           og('og:image:width', '1200'),
           og('og:image:height', '630'),
-          og('og:image:alt', 'Una botella con un mensaje flotando en el mar al atardecer'),
+          og('og:image:alt', 'Una botella con un mensaje flotando en el mar azul al atardecer'),
         );
       }
       return tags;

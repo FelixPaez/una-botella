@@ -316,22 +316,22 @@ function DemoArt() {
           <stop offset="1" stopColor="#f5d4a0" />
         </linearGradient>
         <linearGradient id="demo-sea" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#9fdcd1" />
-          <stop offset="1" stopColor="#5fa9a7" />
+          <stop offset="0" stopColor="#9ad3ea" />
+          <stop offset="1" stopColor="#3f93c2" />
         </linearGradient>
       </defs>
       <rect width="500" height="400" fill="url(#demo-sky)" />
       <circle cx="330" cy="236" r="44" fill="#fbe7c2" />
       <circle cx="330" cy="236" r="86" fill="#f6d6a2" opacity="0.35" />
       <rect y="236" width="500" height="164" fill="url(#demo-sea)" />
-      <path d="M0 236c40-6 80-6 125 0s85 6 125 0 85-6 125 0 85 6 125 0v20H0z" fill="#cbece2" opacity="0.8" />
+      <path d="M0 236c40-6 80-6 125 0s85 6 125 0 85-6 125 0 85 6 125 0v20H0z" fill="#cde8f5" opacity="0.8" />
       <g fill="#fbe2b0">
         <rect x="300" y="258" width="60" height="3" rx="1.5" />
         <rect x="286" y="276" width="88" height="3" rx="1.5" opacity="0.8" />
         <rect x="270" y="298" width="120" height="3" rx="1.5" opacity="0.6" />
         <rect x="252" y="326" width="156" height="3" rx="1.5" opacity="0.45" />
       </g>
-      <path d="M120 120q9-9 18 0m0 0q9-9 18 0M180 96q6-6 12 0m0 0q6-6 12 0" fill="none" stroke="#1f4e5a" strokeWidth="2.5" strokeLinecap="round" opacity="0.5" />
+      <path d="M120 120q9-9 18 0m0 0q9-9 18 0M180 96q6-6 12 0m0 0q6-6 12 0" fill="none" stroke="#18466a" strokeWidth="2.5" strokeLinecap="round" opacity="0.5" />
     </svg>
   );
 }

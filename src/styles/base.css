@@ -43,7 +43,7 @@
   :focus-visible {
     outline: 2px solid var(--color-deep);
     outline-offset: 2px;
-    box-shadow: 0 0 0 5px rgb(244 251 249 / 0.9);
+    box-shadow: 0 0 0 5px rgb(245 250 253 / 0.9);
   }
 }
 
@@ -51,23 +51,23 @@
 :root {
   --on-sea: var(--color-deep);
   --on-sea-soft: var(--color-ink-soft);
-  --veil: rgb(244 251 249 / 0.72);
-  --sky-top: #bfe0ee;
+  --veil: rgb(245 250 253 / 0.72);
+  --sky-top: #9fcff0;
 }
 
 :root[data-mood='morning'] {
-  --sky-top: #cde6f1;
+  --sky-top: #b9d9f0;
 }
 
 :root[data-mood='sunset'] {
-  --sky-top: #c9dbe6;
+  --sky-top: #9db8de;
 }
 
 :root[data-mood='night'] {
   --on-sea: var(--color-foam);
   --on-sea-soft: var(--color-mint);
-  --veil: rgb(13 42 51 / 0.6);
-  --sky-top: #0d2a33;
+  --veil: rgb(10 34 56 / 0.6);
+  --sky-top: #071a2e;
 }
 
 @utility text-on-sea {

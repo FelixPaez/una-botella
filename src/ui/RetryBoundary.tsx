@@ -15,7 +15,7 @@ export class RetryBoundary extends Component<Props, { failed: boolean }> {
     if (!this.state.failed) return this.props.children;
     return (
       <div className="screen retry" role="alert">
-        <p className="font-serif text-letter text-on-sea">{this.props.message}</p>
+        <p className="retry__message on-water font-serif text-letter">{this.props.message}</p>
         <Button onClick={() => window.location.reload()}>{this.props.retry}</Button>
       </div>
     );

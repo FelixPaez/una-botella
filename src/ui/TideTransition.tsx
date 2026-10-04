@@ -93,9 +93,9 @@ function TideCrest() {
         <svg viewBox={`0 0 ${CREST_WIDTH} 170`} preserveAspectRatio="none">
           <defs>
             <linearGradient id={id} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0" stopColor="#9fdcd1" stopOpacity={0.9} />
-              <stop offset="0.35" stopColor="#cbece2" stopOpacity={0.45} />
-              <stop offset="1" stopColor="#f4fbf9" stopOpacity={0} />
+              <stop offset="0" stopColor="#9ad3ea" stopOpacity={0.9} />
+              <stop offset="0.35" stopColor="#cde8f5" stopOpacity={0.45} />
+              <stop offset="1" stopColor="#f5fafd" stopOpacity={0} />
             </linearGradient>
           </defs>
           <g transform="translate(0 21)">

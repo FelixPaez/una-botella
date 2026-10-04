@@ -54,9 +54,11 @@ Descartadas: vibración en iPhone con el truco de `<input switch>`; «sin sonido
 
 ## Sistema de diseño
 
-**Paleta** (contraste WCAG verificado): `foam #F4FBF9`, `paper #FBF9F4`, `mist #E4F3EF`, `sky #DCEEF5`, `mint #CBECE2`,
-`aqua #9FDCD1`, `lagoon #8CCAD9`, `seaglass #6FC0B1`, `tide #3B8792`, `deep #1F4E5A`, `abyss #143A45`, `ink-soft #456E79`,
-`sand #F2E8D8`, `sun #F1CB86`. Texto principal: deep sobre foam 8,7:1. `tide` y `seaglass` nunca son fondo de texto.
+**Paleta** (azul mar; contraste WCAG verificado): `foam #F5FAFD`, `paper #FBF9F4`, `mist #E2F0F8`, `sky #D9ECF7`, `mint #CDE8F5`,
+`aqua #9AD3EA`, `lagoon #7CBFE3`, `seaglass #5BB3D9`, `tide #26729C`, `deep #18466A`, `abyss #0F3352`, `ink-soft #3D627C`,
+`sand #F2E8D8`, `sun #F1CB86`. Texto principal: deep sobre foam 9,4:1. `tide` y `seaglass` nunca son fondo de texto.
+El mar va de azul hondo en el horizonte a turquesa hacia delante; el verde queda solo en el vidrio de la botella.
+Lo poco que va escrito sobre el agua lleva una pastilla de espuma (`.on-water`).
 
 **Tipografía**: Fraunces (instancia propia con SOFT 50 y opsz 32, peso 300–700; romana e itálica) para títulos y carta;
 DM Sans para la interfaz. Nunca menos de 16 px en campos (iOS no hace zoom).

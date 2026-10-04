@@ -28,7 +28,7 @@ export const config: Config = {
   // Vista previa del enlace en WhatsApp: genera curiosidad sin revelar la pregunta.
   meta: {
     title: 'Un mensaje en una botella',
-    description: 'La marea trajo algo para ti. Ábrelo cuando tengas un momento tranquilo.',
+    description: 'La marea te trajo algo. Ábrelo cuando tengas un ratico tranquilo.',
   },
 
   // Se usa para la luna, la hora real del cielo y los horarios de atardecer.
@@ -40,7 +40,7 @@ export const config: Config = {
 
   intro: {
     title: 'Para {nombre}',
-    subtitle: 'La marea trajo algo para ti.',
+    subtitle: 'La marea te trajo algo. Tranquila, no muerde.',
     hint: {
       touch: 'Toca la botella para abrirla',
       mouse: 'Haz clic en la botella para abrirla',
@@ -48,29 +48,29 @@ export const config: Config = {
   },
 
   letter: {
-    greeting: 'Hola, {nombre}:',
+    greeting: '¡Hola, {nombre}!',
     // TODO: borrador sugerido; reescríbelo con tus palabras (2 a 4 páginas).
     // `advance` es el gesto con el que se pasa a lo siguiente: 'tap' (tocar),
     // 'hold' (mantener presionado) o 'swipe' (deslizar).
     pages: [
       {
-        text: 'Dicen que los mensajes importantes llegan por mar, así que me tomé la libertad de enviarte uno.',
+        text: 'Dicen que los mensajes importantes llegan por mar, así que aquí va el mío, en botella y todo. Un poco dramático, lo sé.',
         advance: 'tap',
       },
       {
-        text: 'Me lo paso muy bien hablando contigo, y se me ocurrió que sería todavía mejor hacerlo con el mar de fondo.',
+        text: 'La verdad es que me encanta hablar contigo, y se me ocurrió que sería todavía mejor en persona, con el mar de fondo.',
         advance: 'hold',
       },
       {
-        text: 'Así que, antes de que cambie la marea, quería preguntarte algo…',
+        text: 'Así que, antes de que cambie la marea, te tengo una pregunta…',
         advance: 'swipe',
       },
     ],
     hints: {
       tap: { touch: 'Toca para seguir', mouse: 'Haz clic para seguir' },
       hold: {
-        touch: 'Mantén presionado para despejar la bruma',
-        mouse: 'Mantén pulsado para despejar la bruma',
+        touch: 'Deja el dedo un momento para quitar la bruma',
+        mouse: 'Mantén el clic un momento para quitar la bruma',
       },
       swipe: { touch: 'Desliza hacia arriba', mouse: 'Arrastra hacia arriba o usa la rueda' },
     },
@@ -78,14 +78,14 @@ export const config: Config = {
   },
 
   question: {
-    text: '¿Te gustaría salir conmigo un día de estos?',
+    text: '¿Te animas a salir conmigo un día de estos?',
     yes: 'Sí',
     no: 'No',
   },
 
   noButton: {
     // Una frase por intento; si se acaban, vuelve a empezar.
-    phrases: ['¿Segura?', 'Piénsalo otra vez', 'Este botón es tímido', 'Casi… pero no'],
+    phrases: ['¿Segura?', 'Piénsalo bien…', 'Este botón es medio tímido', 'Casi lo agarras'],
     // Intentos antes de que el "No" se convierta en una salida amable.
     maxAttempts: 4,
     // true = tras esos intentos aparece "Mejor otro día" y se puede pulsar.
@@ -94,14 +94,14 @@ export const config: Config = {
   },
 
   celebration: {
-    title: 'Hasta las olas aplauden',
-    subtitle: 'Ahora viene lo importante: elegir el plan.',
+    title: '¡Hasta las olas están aplaudiendo!',
+    subtitle: 'Ahora lo mejor: escoger el plan.',
   },
 
   decline: {
-    title: 'Gracias por leerla',
+    title: 'Gracias por leerla, de verdad',
     message:
-      'La botella vuelve al mar, sin prisa y sin peso. Si algún día cambia la marea, ya sabes dónde encontrarme.',
+      'Todo bien, sin drama. La botella vuelve al mar, y si algún día cambia la marea, ya sabes dónde encontrarme.',
   },
 
   // Cada lugar es una postal. Funciona igual con 3, 5 u 8.
@@ -112,7 +112,7 @@ export const config: Config = {
       name: 'Atardecer frente al mar',
       tagline: 'El sol también tiene una cita a esa hora',
       description:
-        'Vemos cómo el sol se esconde en el mar, con algo rico para compartir y sin mirar el reloj.',
+        'Vemos al sol esconderse en el mar, con algo rico para picar y sin mirar el reloj.',
       illustration: 'sunset',
       times: 'sunset', // se calculan solos con la puesta de sol de cada día
     },
@@ -121,7 +121,7 @@ export const config: Config = {
       name: 'Picnic en la orilla',
       tagline: 'Mantel, fruta y olas de fondo',
       description:
-        'Un plan tranquilo de tarde: algo rico, un buen sitio en la arena y la conversación haciendo el resto.',
+        'Plan tranquilo de tarde: algo rico, un buen lugar en la arena y que la conversación haga el resto.',
       illustration: 'picnic',
       times: ['15:00', '16:00', '17:00'],
     },
@@ -130,7 +130,7 @@ export const config: Config = {
       name: 'Café con vista al mar',
       tagline: 'Un café, una mesa y conversación sin prisa',
       description:
-        'Una mesa junto a la ventana, el mar de fondo y todo el tiempo del mundo para conocernos.',
+        'Una mesa junto a la ventana, el mar de fondo y todo el tiempo del mundo para conocernos mejor.',
       illustration: 'cafe',
       times: ['09:30', '10:30', '16:00'],
     },
@@ -147,7 +147,7 @@ export const config: Config = {
       id: 'misterio',
       name: 'Plan misterioso',
       tagline: 'Tú eliges el día, yo me encargo del resto',
-      description: 'No puedo contarte mucho. Solo que habrá mar y que valdrá la pena.',
+      description: 'No te puedo contar mucho. Solo que hay mar y que vale la pena. Confía.',
       illustration: 'mystery',
       mystery: true,
     },
@@ -167,13 +167,13 @@ export const config: Config = {
     enabled: true,
     maxLength: 140,
     label: 'Una nota (si quieres)',
-    placeholder: 'Si quieres, déjame una nota…',
+    placeholder: '¿Algo que deba saber? Antojos, alergias, chistes malos…',
   },
 
   // Textos de las pantallas del plan (títulos y botones).
   plan: {
     label: 'El plan',
-    title: '¿Qué te apetece?',
+    title: '¿Qué plan te gusta más?',
     next: 'Elegir el día',
     save: 'Guardar',
     cancel: 'Volver al resumen',
@@ -183,9 +183,9 @@ export const config: Config = {
 
   when: {
     label: 'La fecha',
-    title: '¿Qué día te viene bien?',
+    title: '¿Qué día te cuadra?',
     timeTitle: '¿A qué hora?',
-    pickDayFirst: 'Elige primero un día.',
+    pickDayFirst: 'Primero escoge un día.',
     today: 'Hoy',
     tomorrow: 'Mañana',
     back: 'Volver',
@@ -195,7 +195,7 @@ export const config: Config = {
 
   summary: {
     label: 'El resumen',
-    title: 'Así queda nuestra postal',
+    title: 'Así nos quedó la postal',
     planLabel: 'Plan',
     dateLabel: 'Día',
     timeLabel: 'Hora',
@@ -204,14 +204,14 @@ export const config: Config = {
     edit: 'Cambiar',
     confirm: 'Confirmar por WhatsApp',
     copy: '¿No se abrió WhatsApp? Copiar el mensaje',
-    copied: 'Mensaje copiado. Pégalo en nuestro chat.',
+    copied: 'Copiado. Pégalo en nuestro chat.',
     back: 'Volver',
   },
 
   whatsapp: {
     // El mensaje que ella te enviará. Las líneas con {nota} desaparecen si no escribe nada.
     template: [
-      '¡Hola! Abrí la botella 🌊 y mi respuesta es sí.',
+      '¡Abrí la botella! 🌊 Y la respuesta es sí.',
       '',
       '📍 {lugar}',
       '📅 {fecha}',
@@ -225,14 +225,14 @@ export const config: Config = {
 
   farewell: {
     title: 'Nos vemos {fecha}',
-    message: 'La botella vuelve al mar. Lo demás lo escribimos en persona.',
+    message: 'La botella vuelve al mar. Lo demás lo hablamos en persona.',
   },
 
   // Guiños que aparecen según lo que elija.
   quips: {
-    fullMoon: 'Luna llena. Buen ojo.',
+    fullMoon: 'Luna llena. Tienes buen ojo.',
     newMoon: 'Luna nueva: más estrellas para contar.',
-    weekend: 'Fin de semana: sin prisas.',
+    weekend: 'Fin de semana: cero apuro.',
     today: '¿Hoy mismo? Me gusta tu estilo.',
   },
 
@@ -248,7 +248,7 @@ export const config: Config = {
 
   // Si se corta la conexión justo al cargar las postales.
   connection: {
-    lost: 'La marea se llevó la conexión un momento.',
-    retry: 'Volver a intentarlo',
+    lost: 'Se fue la conexión un momentico.',
+    retry: 'Intentar de nuevo',
   },
 };

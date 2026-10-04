@@ -58,7 +58,7 @@ export function IntroScreen() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ ...transition.enter, delay: 1.6 }}
         >
-          <HintButton icon={<span className="pulse-dot" />} onClick={open}>
+          <HintButton icon={<span className="pulse-dot" />} onClick={open} className="on-water">
             {config.intro.hint[pointerFine ? 'mouse' : 'touch']}
           </HintButton>
         </m.div>

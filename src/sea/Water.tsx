@@ -15,9 +15,13 @@ export function Water({ width, parallax, lite, actors }: Props) {
           <WaveBand spec={band} width={width} parallax={parallax} />
         </Fragment>
       ))}
+      <LightRays />
       <div className="water-tint water-tint--morning" />
       <div className="water-tint water-tint--sunset" />
       <div className="water-tint water-tint--night" />
+      <div className="sun-path sun-path--day" />
+      <div className="sun-path sun-path--sunset" />
+      <div className="sun-path sun-path--moon" />
       <Glints tone="cool" count={lite ? 7 : 14} />
       <Glints tone="warm" count={lite ? 7 : 14} />
       <Bubbles count={lite ? 4 : 9} />
@@ -41,7 +45,8 @@ function WaveBand({ spec, width, parallax }: { spec: BandSpec; width: number; pa
         className="band__body"
         style={{
           top: spec.amp * 2 + CREST_OVERLAP / 2,
-          background: `linear-gradient(180deg, ${spec.colors[0]}, ${spec.colors[1]})`,
+          // Mismo color plano que la cresta mientras la tapa (y su vaivén): sin escalón visible.
+          background: `linear-gradient(180deg, ${spec.colors[0]} ${CREST_OVERLAP}px, ${spec.colors[1]})`,
         }}
       />
       <m.div className="band__crest" style={{ height: crestHeight, x }}>
@@ -97,6 +102,29 @@ function Glints({ tone, count }: { tone: 'cool' | 'warm'; count: number }) {
             animationDuration: `${g.duration}s`,
             animationDelay: `${g.delay}s`,
           }}
+        />
+      ))}
+    </div>
+  );
+}
+
+/** Haces de luz que entran por la superficie y respiran despacio (solo opacidad). */
+const RAYS = [
+  { left: 8, width: 7, duration: 7.5, delay: -2 },
+  { left: 24, width: 4, duration: 6.2, delay: -5 },
+  { left: 41, width: 9, duration: 8.4, delay: -1 },
+  { left: 63, width: 5, duration: 6.8, delay: -3.5 },
+  { left: 80, width: 8, duration: 7.9, delay: -6 },
+];
+
+function LightRays() {
+  return (
+    <div className="light-rays" aria-hidden="true">
+      {RAYS.map((r) => (
+        <span
+          key={r.left}
+          className="light-ray"
+          style={{ left: `${r.left}%`, width: `${r.width}%`, animationDuration: `${r.duration}s`, animationDelay: `${r.delay}s` }}
         />
       ))}
     </div>

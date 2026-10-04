@@ -80,7 +80,7 @@ export function BottleArt({ name, width, motion, glint, corkRef, neckRef }: Prop
 
       {/* Vidrio trasero */}
       <path d={GLASS} fill={`url(#${id('glass')})`} />
-      <ellipse cx="208" cy="58" rx="2.2" ry="10" fill="#1f4e5a" opacity="0.28" />
+      <ellipse cx="208" cy="58" rx="2.2" ry="10" fill="#18466a" opacity="0.28" />
 
       {/* La carta enrollada, atada con una cinta */}
       <m.g style={{ opacity: motion.letter }}>
@@ -88,13 +88,13 @@ export function BottleArt({ name, width, motion, glint, corkRef, neckRef }: Prop
         <ellipse cx="44.5" cy="60" rx="3.6" ry="10.6" fill="#e3d8c2" />
         <ellipse cx="145.5" cy="60" rx="3.6" ry="10.6" fill="#f6f1e5" stroke="#c9b99a" strokeWidth="0.7" />
         <path d="M145.8 54.6c2.1.2 2.4 3.1.3 3.6s-2.5 4 .1 4.4" fill="none" stroke="#b5a585" strokeWidth="0.7" />
-        <rect x="91.5" y="48.6" width="7" height="22.8" fill="#3b8792" />
-        <path d="M95 48.8c-5.2-6-11.4-4.8-9.2.2 1.5 3.3 6.1 1.7 9.2-.2zm0 0c5.2-6 11.4-4.8 9.2.2-1.5 3.3-6.1 1.7-9.2-.2z" fill="#3b8792" />
+        <rect x="91.5" y="48.6" width="7" height="22.8" fill="#26729c" />
+        <path d="M95 48.8c-5.2-6-11.4-4.8-9.2.2 1.5 3.3 6.1 1.7 9.2-.2zm0 0c5.2-6 11.4-4.8 9.2.2-1.5 3.3-6.1 1.7-9.2-.2z" fill="#26729c" />
       </m.g>
 
       {/* Vidrio delantero: brillo, borde y reflejos */}
       <path d={GLASS} fill="#ffffff" opacity="0.08" />
-      <path d={GLASS} fill="none" stroke="#1f4e5a" strokeOpacity="0.24" strokeWidth="1.1" />
+      <path d={GLASS} fill="none" stroke="#18466a" strokeOpacity="0.24" strokeWidth="1.1" />
       <path d={GLASS} fill="none" stroke="#ffffff" strokeOpacity="0.5" strokeWidth="1.4" transform="translate(0 0.6)" />
       <path d="M46 33.5H136" stroke="#ffffff" strokeOpacity="0.62" strokeWidth="4" strokeLinecap="round" />
       <path d="M24 47c-3 6-3 12 0 18" fill="none" stroke="#ffffff" strokeOpacity="0.36" strokeWidth="3" strokeLinecap="round" />
@@ -120,12 +120,12 @@ export function BottleArt({ name, width, motion, glint, corkRef, neckRef }: Prop
         <path
           d={`M${tagLeft} 8H${tagRight - 6}L${tagRight} 14V20L${tagRight - 6} 26H${tagLeft}Z`}
           fill="#fbf9f4"
-          stroke="#1f4e5a"
+          stroke="#18466a"
           strokeOpacity="0.3"
           strokeWidth="0.8"
         />
-        <circle cx={tagRight - 5} cy="17" r="1.8" fill="none" stroke="#1f4e5a" strokeOpacity="0.4" strokeWidth="0.8" />
-        <text x={tagLeft + 7} y="20.6" fontFamily="Fraunces, Georgia, serif" fontSize="10.5" fontWeight="600" fill="#1f4e5a">
+        <circle cx={tagRight - 5} cy="17" r="1.8" fill="none" stroke="#18466a" strokeOpacity="0.4" strokeWidth="0.8" />
+        <text x={tagLeft + 7} y="20.6" fontFamily="Fraunces, Georgia, serif" fontSize="10.5" fontWeight="600" fill="#18466a">
           {label}
         </text>
       </g>

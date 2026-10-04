@@ -121,7 +121,7 @@ export function SummaryScreen() {
         >
           {config.summary.confirm}
         </ButtonLink>
-        <button type="button" className="summary__copy" onClick={copy} aria-live="polite">
+        <button type="button" className="summary__copy on-water" onClick={copy} aria-live="polite">
           {copied ? config.summary.copied : config.summary.copy}
         </button>
         <Button variant="secondary" block onClick={() => dispatch({ type: 'BACK' })}>

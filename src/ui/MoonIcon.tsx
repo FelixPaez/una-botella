@@ -26,7 +26,7 @@ export function MoonIcon({ phase, size = 16, south = false, className, labelled 
       aria-label={labelled ? moonPhaseName(phase) : undefined}
       aria-hidden={labelled ? undefined : true}
     >
-      <circle r={10} fill="var(--moon-shadow, rgb(31 78 90 / 0.8))" />
+      <circle r={10} fill="var(--moon-shadow, rgb(24 70 106 / 0.8))" />
       {lit && <path d={lit} fill="var(--moon-lit, #fdfcf7)" />}
       <circle r={10} fill="none" stroke="currentColor" strokeOpacity={0.45} strokeWidth={0.9} />
     </svg>

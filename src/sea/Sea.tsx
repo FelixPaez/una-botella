@@ -10,10 +10,10 @@ import { Water } from './Water.tsx';
 
 /** Color de la barra del navegador para cada hora (el tono de arriba del cielo). */
 const THEME_COLOR: Record<Mood, string> = {
-  morning: '#cde6f1',
-  day: '#bfe0ee',
-  sunset: '#c9dbe6',
-  night: '#0d2a33',
+  morning: '#b9d9f0',
+  day: '#9fcff0',
+  sunset: '#9db8de',
+  night: '#071a2e',
 };
 
 export type SeaProps = {

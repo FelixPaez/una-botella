@@ -55,7 +55,7 @@ export function WhenScreen() {
           ) : (
             <DayStrip days={days} selected={date} onPick={pickDay} />
           )}
-          <div className="when__caption text-on-sea" aria-live="polite">
+          <div className={`when__caption text-on-sea ${selectedDay ? 'on-water' : ''}`} aria-live="polite">
             {selectedDay && (
               <>
                 <MoonIcon phase={selectedDay.moon} size={16} south={south} className="when__caption-moon" />
@@ -69,7 +69,7 @@ export function WhenScreen() {
             {quip && (
               <m.p
                 key={quip}
-                className="when__quip text-on-sea-soft"
+                className="when__quip on-water text-on-sea-soft"
                 initial={{ opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, transition: transition.exit }}

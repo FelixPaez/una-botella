@@ -3,27 +3,29 @@
  * radios, sombras y curvas. Las curvas y duraciones están replicadas en
  * src/design/motion.ts (un test comprueba que coinciden).
  *
+ * Paleta azul mar (el verde quedó solo en el vidrio de la botella).
  * Contrastes WCAG verificados (texto / fondo):
- *   deep / foam 8,7:1 · deep / lagoon 5,0:1 · ink-soft / foam 5,3:1
- *   foam / deep 8,7:1 · foam / abyss 11,6:1 · mint / abyss 9,7:1
- *   tide y seaglass nunca se usan como fondo de texto normal.
+ *   deep / foam 9,4:1 · deep / lagoon 4,9:1 · ink-soft / foam 6,2:1 · tide / paper 5,0:1
+ *   foam / deep 9,4:1 · foam / abyss 12,4:1 · mint / abyss 10,2:1
+ *   tide y seaglass nunca se usan como fondo de texto normal. Sobre el agua, el texto
+ *   va en una pastilla `.on-water` (deep sobre espuma 9,2:1).
  */
 
 @theme static {
   --color-*: initial;
   --color-white: #ffffff;
-  --color-foam: #f4fbf9;
+  --color-foam: #f5fafd;
   --color-paper: #fbf9f4;
-  --color-mist: #e4f3ef;
-  --color-sky: #dceef5;
-  --color-mint: #cbece2;
-  --color-aqua: #9fdcd1;
-  --color-lagoon: #8ccad9;
-  --color-seaglass: #6fc0b1;
-  --color-tide: #3b8792;
-  --color-deep: #1f4e5a;
-  --color-abyss: #143a45;
-  --color-ink-soft: #456e79;
+  --color-mist: #e2f0f8;
+  --color-sky: #d9ecf7;
+  --color-mint: #cde8f5;
+  --color-aqua: #9ad3ea;
+  --color-lagoon: #7cbfe3;
+  --color-seaglass: #5bb3d9;
+  --color-tide: #26729c;
+  --color-deep: #18466a;
+  --color-abyss: #0f3352;
+  --color-ink-soft: #3d627c;
   --color-sand: #f2e8d8;
   --color-sun: #f1cb86;
 
@@ -52,10 +54,10 @@
   --radius-chip: 0.875rem;
 
   --shadow-*: initial;
-  --shadow-soft: 0 12px 32px -14px rgb(20 58 69 / 0.28), 0 2px 6px -2px rgb(20 58 69 / 0.08);
-  --shadow-float: 0 28px 60px -24px rgb(20 58 69 / 0.38), 0 8px 18px -10px rgb(20 58 69 / 0.16);
-  --shadow-stamp: 0 1px 2px rgb(20 58 69 / 0.22), 0 4px 10px -4px rgb(20 58 69 / 0.24);
-  --shadow-button: inset 0 1px 0 rgb(255 255 255 / 0.16), 0 10px 22px -12px rgb(20 58 69 / 0.55);
+  --shadow-soft: 0 12px 32px -14px rgb(15 51 82 / 0.28), 0 2px 6px -2px rgb(15 51 82 / 0.08);
+  --shadow-float: 0 28px 60px -24px rgb(15 51 82 / 0.38), 0 8px 18px -10px rgb(15 51 82 / 0.16);
+  --shadow-stamp: 0 1px 2px rgb(15 51 82 / 0.22), 0 4px 10px -4px rgb(15 51 82 / 0.24);
+  --shadow-button: inset 0 1px 0 rgb(255 255 255 / 0.16), 0 10px 22px -12px rgb(15 51 82 / 0.55);
 
   --ease-*: initial;
   --ease-surface: cubic-bezier(0.16, 1, 0.3, 1);
