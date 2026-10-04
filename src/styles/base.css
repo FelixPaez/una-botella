@@ -51,11 +51,23 @@
 :root {
   --on-sea: var(--color-deep);
   --on-sea-soft: var(--color-ink-soft);
+  --veil: rgb(244 251 249 / 0.72);
+  --sky-top: #bfe0ee;
+}
+
+:root[data-mood='morning'] {
+  --sky-top: #cde6f1;
+}
+
+:root[data-mood='sunset'] {
+  --sky-top: #c9dbe6;
 }
 
 :root[data-mood='night'] {
   --on-sea: var(--color-foam);
   --on-sea-soft: var(--color-mint);
+  --veil: rgb(13 42 51 / 0.6);
+  --sky-top: #0d2a33;
 }
 
 @utility text-on-sea {

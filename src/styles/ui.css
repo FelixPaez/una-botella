@@ -1,0 +1,293 @@
+@layer components {
+  /* ---------- Superficies ---------- */
+
+  /* Papel: carta y postales. Opaco a propósito (un blur grande sobre el mar animado cuesta fps). */
+  .paper {
+    position: relative;
+    isolation: isolate;
+    background: linear-gradient(180deg, #fdfcf8 0%, var(--color-paper) 55%, #f6f2e9 100%);
+  }
+  .paper::before,
+  .paper::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+  }
+  /* Grano de papel muy sutil, teñido de teal (se rasteriza una vez y se repite). */
+  .paper::before {
+    z-index: -1;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .12 0 0 0 0 .3 0 0 0 0 .35 0 0 0 .07 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  .paper::after {
+    box-shadow:
+      inset 0 0 0 1px rgb(31 78 90 / 0.07),
+      inset 0 1px 0 rgb(255 255 255 / 0.9);
+  }
+
+  /* Cristal discreto: solo para piezas pequeñas (chips, botones secundarios, paneles). */
+  .glass {
+    position: relative;
+    background: rgb(255 255 255 / 0.82);
+  }
+  @supports ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+    .glass {
+      background: rgb(255 255 255 / 0.55);
+      -webkit-backdrop-filter: blur(14px) saturate(1.25);
+      backdrop-filter: blur(14px) saturate(1.25);
+    }
+  }
+  .glass::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.65);
+  }
+
+  /* Velo de espuma detrás del texto que va sobre el mar: garantiza el contraste (≥ 5:1). */
+  .veil {
+    position: relative;
+    isolation: isolate;
+  }
+  .veil::before {
+    content: '';
+    position: absolute;
+    inset: -1.5rem -2rem;
+    z-index: -1;
+    border-radius: 3rem;
+    background: radial-gradient(closest-side, var(--veil), transparent);
+    pointer-events: none;
+  }
+
+  /* ---------- Revelado de texto ---------- */
+
+  /* Cada palabra sube desde su máscara; el relleno evita recortar tildes y descendentes. */
+  .reveal-word {
+    display: inline-block;
+    overflow: hidden;
+    vertical-align: top;
+    padding: 0.1em 0.04em 0.16em;
+    margin: -0.1em -0.04em -0.16em;
+  }
+
+  /* ---------- Marea entre pantallas ---------- */
+
+  .tide-crest {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+  }
+  .tide-crest__band {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: -30px;
+    height: 170px;
+    overflow: hidden;
+  }
+  .tide-crest[data-dir='-1'] .tide-crest__band {
+    top: auto;
+    bottom: -30px;
+    transform: scaleY(-1);
+  }
+  .tide-crest__drift {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: -16px;
+    width: calc(200% + 64px);
+    animation: wave-drift 7s linear infinite;
+  }
+  .tide-crest__drift > svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* ---------- Barra superior: horizonte con el barquito ---------- */
+
+  .topbar {
+    position: fixed;
+    inset: 0 0 auto;
+    z-index: 30;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0.75rem;
+    height: calc(var(--topbar) + env(safe-area-inset-top));
+    padding: env(safe-area-inset-top) calc(var(--gutter) + env(safe-area-inset-right)) 0
+      calc(var(--gutter) + env(safe-area-inset-left));
+    pointer-events: none;
+  }
+  .topbar > * {
+    pointer-events: auto;
+  }
+  /* Velo del color del cielo: lo que se desplaza por debajo se desvanece, no choca con el horizonte. */
+  .topbar::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 -1.5rem;
+    z-index: -1;
+    background-color: var(--sky-top);
+    -webkit-mask-image: linear-gradient(180deg, #000 45%, transparent);
+    mask-image: linear-gradient(180deg, #000 45%, transparent);
+    transition: background-color var(--duration-ambient) var(--ease-swell);
+  }
+  .topbar__progress {
+    pointer-events: none;
+  }
+
+  .horizon {
+    position: relative;
+    height: 40px;
+  }
+  .horizon__line {
+    position: absolute;
+    inset: 29px 0 auto;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, currentColor 8%, currentColor 92%, transparent);
+    opacity: 0.28;
+  }
+  .horizon__wake {
+    position: absolute;
+    inset: 28.5px 0 auto;
+    height: 2px;
+    border-radius: 2px;
+    background: linear-gradient(90deg, transparent, currentColor 40%);
+    opacity: 0.75;
+    transform-origin: 0 50%;
+  }
+  .horizon__buoy {
+    position: absolute;
+    top: 27px;
+    width: 5px;
+    height: 5px;
+    margin-left: -2.5px;
+    border-radius: 50%;
+    border: 1px solid currentColor;
+    opacity: 0.5;
+  }
+  .horizon__buoy[data-passed] {
+    background: currentColor;
+    opacity: 0.85;
+  }
+  .horizon__label {
+    position: absolute;
+    top: 40px;
+    transform: translateX(-50%);
+    white-space: nowrap;
+    opacity: 0.6;
+  }
+  .horizon__label[data-current] {
+    opacity: 1;
+  }
+  .horizon__track {
+    position: absolute;
+    inset: 0 0 auto;
+    height: 30px;
+  }
+  .horizon__boat {
+    position: absolute;
+    left: -15px;
+    bottom: 0;
+    width: 30px;
+    height: 28px;
+  }
+  .horizon__boat-bob {
+    width: 100%;
+    height: 100%;
+    transform-origin: 50% 85%;
+    animation: boat-bob 3.4s var(--ease-swell) infinite alternate;
+  }
+  .horizon__lighthouse {
+    position: absolute;
+    right: -6px;
+    bottom: calc(100% - 30px);
+    width: 22px;
+    height: 34px;
+  }
+  .horizon__beam {
+    opacity: 0;
+    transition: opacity var(--duration-enter) var(--ease-surface);
+  }
+  .horizon__lighthouse[data-lit] .horizon__beam {
+    opacity: 1;
+    animation: lighthouse-glow 2.6s var(--ease-swell) infinite alternate;
+  }
+
+  @media (min-width: 1024px) {
+    .topbar {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 720px) minmax(0, 1fr);
+    }
+    .topbar__progress {
+      grid-column: 2;
+    }
+    .topbar__actions {
+      grid-column: 3;
+      justify-self: end;
+    }
+    .horizon {
+      height: 60px;
+    }
+  }
+
+  /* ---------- Cinta de borrador ---------- */
+
+  .draft-ribbon {
+    position: fixed;
+    z-index: 60;
+    right: -48px;
+    bottom: calc(26px + env(safe-area-inset-bottom));
+    width: 190px;
+    padding: 5px 0;
+    transform: rotate(-45deg);
+    background: var(--color-sun);
+    color: var(--color-abyss);
+    text-align: center;
+    box-shadow: var(--shadow-soft);
+    pointer-events: none;
+  }
+
+  /* ---------- Pantallas ---------- */
+
+  .screen {
+    position: absolute;
+    inset: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    padding: calc(var(--topbar) + env(safe-area-inset-top) + 0.5rem) calc(var(--gutter) + env(safe-area-inset-right))
+      calc(env(safe-area-inset-bottom) + 1.5rem) calc(var(--gutter) + env(safe-area-inset-left));
+  }
+}
+
+@keyframes boat-bob {
+  from {
+    transform: rotate(-3deg) translate3d(0, 0.5px, 0);
+  }
+  to {
+    transform: rotate(3deg) translate3d(0, -0.5px, 0);
+  }
+}
+
+@keyframes lighthouse-glow {
+  from {
+    opacity: 0.55;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tide-crest__drift,
+  .horizon__boat-bob,
+  .horizon__lighthouse[data-lit] .horizon__beam {
+    animation: none;
+  }
+}
