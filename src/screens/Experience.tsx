@@ -4,11 +4,14 @@ import { useFlow } from '../state/flowContext.ts';
 import { Button } from '../ui/Button.tsx';
 import { Card } from '../ui/Card.tsx';
 import { TideStage } from '../ui/TideTransition.tsx';
+import { CelebrationScreen } from './CelebrationScreen.tsx';
 import { IntroScreen } from './IntroScreen.tsx';
 import { LetterScreen } from './letter/LetterScreen.tsx';
 
 /** La historia de la botella y la carta es una sola pantalla (sin marea entre sus pasos). */
-const STORY = new Set<Step>(['intro', 'opening', 'letter', 'question']);
+const STORY = new Set<Step>(['intro', 'opening', 'letter', 'question', 'celebration', 'declined', 'farewell']);
+/** Pasos en los que se ve la carta (incluido su cierre). */
+const LETTER = new Set<Step>(['opening', 'letter', 'question', 'declined', 'farewell']);
 
 export function Experience() {
   const { state } = useFlow();
@@ -24,8 +27,11 @@ function Story() {
   const { state } = useFlow();
   return (
     <>
-      <AnimatePresence>{state.step === 'intro' && <IntroScreen key="intro" />}</AnimatePresence>
-      {state.step !== 'intro' && <LetterScreen />}
+      <AnimatePresence>
+        {state.step === 'intro' && <IntroScreen key="intro" />}
+        {LETTER.has(state.step) && <LetterScreen key="letter" />}
+        {state.step === 'celebration' && <CelebrationScreen key="celebration" />}
+      </AnimatePresence>
     </>
   );
 }

@@ -28,7 +28,9 @@ export function Ripples({ lite }: { lite: boolean }) {
     const rings = make('ripple', 6);
     const drops = make('touch-bubble', 16);
     const droplets = make('droplet', 8);
-    const sparkles = make('sparkle', 3, SPARKLE_SVG);
+    const sparkles = make('sparkle', 18, SPARKLE_SVG);
+    const festive = make('touch-bubble', 40);
+    let f = 0;
     let r = 0;
     let d = 0;
     let s = 0;
@@ -75,6 +77,44 @@ export function Ripples({ lite }: { lite: boolean }) {
             { opacity: 0, transform: at(x + dx, y - rise, size) },
           ],
           { duration: 1300 + Math.random() * 500, delay: i * 60, easing },
+        );
+      }
+    };
+
+    /** El sí: una columna de burbujas sube desde el fondo y el agua se llena de destellos. */
+    const burst = () => {
+      const W = window.innerWidth;
+      const H = window.innerHeight;
+      const top = horizon * H;
+      const count = reduced ? 0 : lite ? 18 : festive.length;
+      for (let i = 0; i < count; i++) {
+        const x = W / 2 + (Math.random() - 0.5) * W * (0.25 + Math.random() * 0.55);
+        const size = 0.6 + Math.random() * 1.4;
+        const end = top + Math.random() * (H - top) * 0.35;
+        const sway = (Math.random() - 0.5) * 40;
+        festive[f++ % festive.length].animate(
+          [
+            { opacity: 0, transform: at(x, H + 20, size) },
+            { opacity: 1, transform: at(x + sway * 0.5, H - (H - end) * 0.25, size), offset: 0.2 },
+            { opacity: 0.9, transform: at(x - sway * 0.4, H - (H - end) * 0.7, size), offset: 0.65 },
+            { opacity: 0, transform: at(x + sway, end, size) },
+          ],
+          { duration: 1900 + Math.random() * 1100, delay: Math.random() * 900, easing: cssEase(ease.swell) },
+        );
+      }
+      // Destellos sobre el agua (de noche y de día).
+      for (let i = 0; i < (lite ? 8 : 14); i++) {
+        const x = Math.random() * W;
+        const y = top + Math.random() * (H - top) * 0.45;
+        sparkles[s++ % sparkles.length].animate(
+          reduced
+            ? [{ opacity: 0.8, transform: at(x, y) }, { opacity: 0, transform: at(x, y) }]
+            : [
+                { opacity: 0, transform: at(x, y, 0, 0) },
+                { opacity: 1, transform: at(x, y, 1.2, 45), offset: 0.4 },
+                { opacity: 0, transform: at(x, y, 0.2, 90) },
+              ],
+          { duration: 900, delay: 200 + Math.random() * 1600, easing },
         );
       }
     };
@@ -156,6 +196,7 @@ export function Ripples({ lite }: { lite: boolean }) {
     const off = seaBus.on((event) => {
       if (event.type === 'ripple') touch(event.x, event.y);
       if (event.type === 'splash') splash(event.x, event.y);
+      if (event.type === 'burst') burst();
     });
 
     return () => {

@@ -1,8 +1,11 @@
 import type { Viewport } from '../hooks/useViewport.ts';
 import { BANDS } from '../sea/waves.ts';
 
-/** float = en primer plano (intro) · opening = abriéndose · away = pequeña en el horizonte. */
-export type BottlePose = 'float' | 'opening' | 'away';
+/**
+ * float = en primer plano (intro) · opening = abriéndose · away = pequeña en el horizonte ·
+ * closing = vuelve, recibe la carta, se tapa y se aleja.
+ */
+export type BottlePose = 'float' | 'opening' | 'away' | 'closing';
 
 /** Proporciones del dibujo de la botella (viewBox 240 × 110). */
 export const BOTTLE_VIEW = { width: 240, height: 110 } as const;

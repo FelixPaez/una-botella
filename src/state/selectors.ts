@@ -11,6 +11,11 @@ export function swellFor(step: Step): number {
     case 'letter':
     case 'question':
       return 0.22;
+    case 'celebration':
+      return 0.95;
+    case 'declined':
+    case 'farewell':
+      return 0.18;
     default:
       return 0.4;
   }
@@ -20,6 +25,7 @@ export function swellFor(step: Step): number {
 export function bottlePoseFor(step: Step): BottlePose {
   if (step === 'intro') return 'float';
   if (step === 'opening') return 'opening';
+  if (step === 'declined' || step === 'farewell') return 'closing';
   return 'away';
 }
 

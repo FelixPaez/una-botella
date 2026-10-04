@@ -1,7 +1,12 @@
 import { createContext, useContext, type Dispatch } from 'react';
 import type { FlowAction, FlowState } from './flow.ts';
 
-type FlowContextValue = { state: FlowState; dispatch: Dispatch<FlowAction> };
+type FlowContextValue = {
+  state: FlowState;
+  dispatch: Dispatch<FlowAction>;
+  /** Paso con el que se cargó la página (para no repetir animaciones de cierre al recargar). */
+  initialStep: FlowState['step'];
+};
 
 export const FlowContext = createContext<FlowContextValue | null>(null);
 

@@ -12,17 +12,37 @@ import { BOTTLE_TILT, BOTTLE_VIEW, LETTER_LENGTH, bottleGeometry, type BottlePos
 
 const wait = (ms: number) => new Promise<void>((resolve) => window.setTimeout(resolve, ms));
 
+/** Cierre: vuelve → espera la carta → se tapa → se aleja → ya lejos. */
+type ClosingStage = 'returning' | 'waiting' | 'sealing' | 'leaving' | 'done';
+
 /**
  * La botella: vive dentro del mar (entre olas) y nunca se desmonta.
- * float → en primer plano · opening → corcho, burbujas y carta · away → pequeña en el horizonte.
+ * float → en primer plano · opening → corcho, burbujas y carta · away → pequeña en el horizonte ·
+ * closing → vuelve a por la carta, se tapa y se aleja.
  */
 export function BottleActor({ pose, lite }: { pose: BottlePose; lite: boolean }) {
   const geo = bottleGeometry(useViewport());
   const reduced = Boolean(useReducedMotion());
+  const [initialPose] = useState(pose);
   const [drifted, setDrifted] = useState(false);
-  const effective: BottlePose = pose === 'opening' && drifted ? 'away' : pose;
+  const [closing, setClosing] = useState<ClosingStage>(initialPose === 'closing' ? 'done' : 'returning');
+
+  const effective: 'float' | 'away' =
+    pose === 'float'
+      ? 'float'
+      : pose === 'opening'
+        ? drifted
+          ? 'away'
+          : 'float'
+        : pose === 'closing'
+          ? closing === 'leaving' || closing === 'done'
+            ? 'away'
+            : 'float'
+          : 'away';
   const place = effective === 'away' ? geo.away : geo.float;
   const arriving = pose === 'float' && !reduced;
+  // Si se recarga en el final, la botella ya está tapada y lejos.
+  const sealedAtStart = initialPose === 'float' || initialPose === 'closing';
 
   // La posición estable va por CSS (left/top); las transiciones son solo transform (FLIP).
   const dx = useMotionValue(arriving ? 70 : 0);
@@ -33,13 +53,12 @@ export function BottleActor({ pose, lite }: { pose: BottlePose; lite: boolean })
   const tilt = useSpring(bottleTilt, spring.buoy);
   const rotate = useTransform([wobble, tilt], ([w, t]: number[]) => BOTTLE_TILT + w + t);
 
-  const sealed = pose === 'float';
   const art = {
     corkX: useMotionValue(0),
     corkY: useMotionValue(0),
     corkRotate: useMotionValue(0),
-    corkOpacity: useMotionValue(sealed ? 1 : 0),
-    letter: useMotionValue(sealed ? 1 : 0),
+    corkOpacity: useMotionValue(sealedAtStart ? 1 : 0),
+    letter: useMotionValue(sealedAtStart ? 1 : 0),
     bubbles: useMotionValue(0),
   };
   const corkRef = useRef<SVGGElement>(null);
@@ -48,6 +67,23 @@ export function BottleActor({ pose, lite }: { pose: BottlePose; lite: boolean })
   useLayoutEffect(() => {
     geoRef.current = geo;
   });
+
+  // La carta necesita saber dónde está el cuello (para salir y para volver a entrar).
+  useEffect(() => {
+    bottleBus.neck = () => {
+      const neck = neckRef.current?.getBoundingClientRect();
+      if (!neck) return null;
+      return {
+        x: neck.left + neck.width / 2,
+        y: neck.top + neck.height / 2,
+        length: (LETTER_LENGTH / BOTTLE_VIEW.width) * geoRef.current.width,
+        angle: BOTTLE_TILT + wobble.get(),
+      };
+    };
+    return () => {
+      bottleBus.neck = null;
+    };
+  }, [wobble]);
 
   // Llegada en la intro: entra a la deriva desde la derecha.
   useEffect(() => {
@@ -60,7 +96,7 @@ export function BottleActor({ pose, lite }: { pose: BottlePose; lite: boolean })
     return () => controls.forEach((c) => c.stop());
   }, [dx, dy, opacity]);
 
-  // Cambio de pose: el sitio cambia de golpe en CSS y el transform recorre la distancia.
+  // Cambio de sitio: la posición cambia de golpe en CSS y el transform recorre la distancia.
   const prevEffective = useRef(effective);
   useLayoutEffect(() => {
     const from = prevEffective.current;
@@ -72,10 +108,18 @@ export function BottleActor({ pose, lite }: { pose: BottlePose; lite: boolean })
     dx.set(dx.get() + a.x - b.x);
     dy.set(dy.get() + a.y - b.y);
     const t = reduced ? transition.reduced : transition.ambient;
+    const toAway = effective === 'away';
     animate(dx, 0, t);
-    animate(dy, 0, t);
-    animate(scale, effective === 'away' ? g.away.scale : 1, t);
-  }, [effective, reduced, dx, dy, scale]);
+    animate(dy, 0, {
+      ...t,
+      onComplete: () => {
+        if (pose !== 'closing') return;
+        // De vuelta para recoger la carta, o ya lejos tras tapar.
+        setClosing((stage) => (stage === 'returning' ? 'waiting' : stage === 'leaving' ? 'done' : stage));
+      },
+    });
+    animate(scale, toAway ? g.away.scale : 1, t);
+  }, [effective, reduced, pose, dx, dy, scale]);
 
   // Apertura: tambaleo, el corcho salta, burbujas, la carta sale y el corcho cae al agua.
   useEffect(() => {
@@ -83,14 +127,8 @@ export function BottleActor({ pose, lite }: { pose: BottlePose; lite: boolean })
     let cancelled = false;
 
     const launch = () => {
-      const neck = neckRef.current?.getBoundingClientRect();
-      if (!neck) return;
-      bottleBus.launch({
-        x: neck.left + neck.width / 2,
-        y: neck.top + neck.height / 2,
-        length: (LETTER_LENGTH / BOTTLE_VIEW.width) * geoRef.current.width,
-        angle: BOTTLE_TILT + wobble.get(),
-      });
+      const info = bottleBus.neck?.();
+      if (info) bottleBus.launch.emit(info);
     };
     const splash = () => {
       const cork = corkRef.current?.getBoundingClientRect();
@@ -136,6 +174,48 @@ export function BottleActor({ pose, lite }: { pose: BottlePose; lite: boolean })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pose, reduced]);
 
+  // Cierre: al entrar en "closing" vuelve (FLIP); cuando está esperando, avisa a la carta.
+  useEffect(() => {
+    if (pose !== 'closing' || initialPose === 'closing') return;
+    if (closing === 'waiting') bottleBus.arrived.emit();
+  }, [pose, closing, initialPose]);
+
+  // Cuando la carta entra por el cuello: se ve dentro, el corcho entra de golpe y se aleja.
+  useEffect(() => {
+    if (pose !== 'closing' || initialPose === 'closing') return;
+    let cancelled = false;
+    const off = bottleBus.deliver.on(() => {
+      void (async () => {
+        setClosing('sealing');
+        animate(art.letter, 1, { duration: 0.35, ease: ease.surface });
+        art.corkX.set(reduced ? 0 : 38);
+        art.corkY.set(reduced ? 0 : -20);
+        art.corkRotate.set(reduced ? 0 : 70);
+        animate(art.corkOpacity, 1, { duration: 0.2 });
+        animate(art.corkX, 0, spring.stamp);
+        animate(art.corkRotate, 0, spring.stamp);
+        animate(art.corkY, 0, {
+          ...spring.stamp,
+          onComplete: () => {
+            feedback('pop');
+            if (!reduced) animate(wobble, [0, -4, 3, -1.5, 0], { duration: 0.55, ease: ease.swell });
+          },
+        });
+        await wait(reduced ? 300 : 1100);
+        if (cancelled) return;
+        setClosing('leaving');
+        await wait(reduced ? 200 : 900);
+        if (!cancelled) bottleBus.gone.emit();
+      })();
+    });
+    return () => {
+      cancelled = true;
+      off();
+    };
+    // `art` y `wobble` son motion values estables.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pose, initialPose, reduced]);
+
   return (
     <m.div
       className="bottle-actor"
@@ -156,7 +236,7 @@ export function BottleActor({ pose, lite }: { pose: BottlePose; lite: boolean })
               name={config.recipient.name}
               width={geo.width}
               motion={art}
-              glint={!lite && pose === 'float'}
+              glint={!lite && (pose === 'float' || effective === 'float')}
               corkRef={corkRef}
               neckRef={neckRef}
             />

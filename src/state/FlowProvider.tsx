@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useReducer, type ReactNode } from 'react';
+import { useEffect, useMemo, useReducer, useState, type ReactNode } from 'react';
 import { config } from '../config.ts';
 import { createFlowReducer } from './flow.ts';
 import { FlowContext } from './flowContext.ts';
@@ -21,9 +21,8 @@ function safeSession(): Storage | null {
 }
 
 export function FlowProvider({ children }: { children: ReactNode }) {
-  const [state, dispatch] = useReducer(reducer, undefined, () =>
-    loadFlow(window.location.search, safeSession(), PAGES),
-  );
+  const [initial] = useState(() => loadFlow(window.location.search, safeSession(), PAGES));
+  const [state, dispatch] = useReducer(reducer, initial);
 
   // Si el navegador recarga (o ella vuelve de WhatsApp), retoma donde estaba.
   useEffect(() => {
@@ -34,6 +33,6 @@ export function FlowProvider({ children }: { children: ReactNode }) {
     }
   }, [state]);
 
-  const value = useMemo(() => ({ state, dispatch }), [state]);
+  const value = useMemo(() => ({ state, dispatch, initialStep: initial.step }), [state, initial.step]);
   return <FlowContext.Provider value={value}>{children}</FlowContext.Provider>;
 }

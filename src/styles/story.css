@@ -306,6 +306,101 @@
     }
   }
 
+  .letter__fade {
+    position: absolute;
+    inset: 0;
+  }
+
+  /* ---------- La pregunta ---------- */
+
+  .question__actions {
+    gap: 1.75rem;
+  }
+  .question__yes {
+    position: relative;
+  }
+  .question__yes-button {
+    min-width: 7rem;
+  }
+  .question__ring {
+    position: absolute;
+    inset: 0;
+    border-radius: 999px;
+    box-shadow:
+      0 0 0 2px rgb(241 203 134 / 0.9),
+      0 0 24px 6px rgb(241 203 134 / 0.45);
+    pointer-events: none;
+  }
+  .runaway-no__slot {
+    display: inline-flex;
+  }
+  .runaway-no {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 3.25rem;
+    padding: 0 1.6rem;
+    border-radius: 999px;
+    font-family: var(--font-sans);
+    font-size: var(--text-body);
+    font-weight: 600;
+    white-space: nowrap;
+    color: var(--color-deep);
+    background: rgb(255 255 255 / 0.85);
+    box-shadow:
+      inset 0 0 0 1px rgb(31 78 90 / 0.14),
+      var(--shadow-soft);
+    touch-action: none;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+  }
+  .runaway-no--ghost {
+    visibility: hidden;
+  }
+  .runaway-no--floating {
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 45;
+  }
+  .runaway-no.is-still {
+    touch-action: manipulation;
+    cursor: pointer;
+  }
+
+  /* ---------- Celebración y mensaje final ---------- */
+
+  .celebration,
+  .closing {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+  }
+  .celebration__text,
+  .closing__text {
+    margin-top: calc(var(--topbar) + env(safe-area-inset-top) + 9vh);
+    padding: 0 calc(var(--gutter) + env(safe-area-inset-left));
+    max-width: 34rem;
+    text-align: center;
+  }
+  .celebration__subtitle,
+  .closing__message {
+    margin-top: 0.85rem;
+  }
+  .closing {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+  @media (min-width: 1024px) {
+    .celebration__text,
+    .closing__text {
+      margin-top: 20vh;
+      max-width: 40rem;
+    }
+  }
+
   /* ---------- Bruma ---------- */
 
   .mist {

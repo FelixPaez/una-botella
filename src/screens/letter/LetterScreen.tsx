@@ -3,30 +3,46 @@ import * as m from 'motion/react-m';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { bottleBus, type LaunchInfo } from '../../actors/bottleBus.ts';
 import { config } from '../../config.ts';
-import { feedback } from '../../design/feedback.ts';
 import { dur, ease, transition } from '../../design/motion.ts';
-import { usePointerFine } from '../../hooks/useMediaQuery.ts';
-import { useSwipeUp } from '../../hooks/useSwipeUp.ts';
+import { formatDateLong } from '../../lib/dates.ts';
 import { fill } from '../../lib/format.ts';
 import { useFlow } from '../../state/flowContext.ts';
-import { HintButton } from '../../ui/HintButton.tsx';
-import { HoldButton } from '../../ui/HoldButton.tsx';
 import { RevealText } from '../../ui/RevealText.tsx';
-import { Mist } from './Mist.tsx';
+import { LetterContent } from './LetterPages.tsx';
 import { RolledLetter } from './RolledLetter.tsx';
 
-type Phase = 'waiting' | 'flying' | 'unrolling' | 'open';
+/**
+ * waiting → flying → unrolling → open: la carta llega desde la botella y se despliega.
+ * rolling-up / rolled → returning → gone: se enrolla, vuelve a la botella y se va con ella.
+ */
+type Phase = 'waiting' | 'flying' | 'unrolling' | 'open' | 'rolling-up' | 'rolled' | 'returning' | 'gone';
+
+const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v));
+/** Proporción grosor/largo de la carta enrollada dentro de la botella (22 / 102 en el dibujo). */
+const THICKNESS = 22 / 102;
 
 /**
  * La carta: llega enrollada desde la botella, se desenrolla (wipe con doble
  * transform + el rollo bajando por el borde) y muestra el mensaje página a página.
+ * Al final (o con «Mejor otro día») hace el camino inverso y vuelve al mar.
  */
 export function LetterScreen() {
-  const { state, dispatch } = useFlow();
+  const { state, dispatch, initialStep } = useFlow();
   const reduced = Boolean(useReducedMotion());
-  const [phase, setPhase] = useState<Phase>(() => (state.step === 'opening' ? 'waiting' : 'open'));
+  const closingStep = state.step === 'declined' || state.step === 'farewell';
+  const [phase, setPhase] = useState<Phase>(() => {
+    if (state.step === 'opening') return 'waiting';
+    // Si se recarga ya en el final, se muestra el final tal cual (sin repetir la animación).
+    if (closingStep) return state.step === initialStep ? 'gone' : 'rolled';
+    return 'open';
+  });
+  const [showMessage, setShowMessage] = useState(closingStep && state.step === initialStep);
+  // 4. Cierre desde la carta abierta («Mejor otro día»): el texto se desvanece y se enrolla.
+  if (closingStep && phase === 'open') setPhase('rolling-up');
+
   const unroll = useMotionValue(phase === 'open' ? 1 : 0);
   const ribbon = useMotionValue(phase === 'open' ? 1 : 0);
+  const contentOpacity = useMotionValue(1);
   const flyX = useMotionValue(0);
   const flyY = useMotionValue(0);
   const flyScaleX = useMotionValue(1);
@@ -49,7 +65,7 @@ export function LetterScreen() {
       }, 450);
       return () => window.clearTimeout(id);
     }
-    const off = bottleBus.onLaunch((info) => {
+    const off = bottleBus.launch.on((info) => {
       launch.current = info;
       setPhase('flying');
     });
@@ -69,8 +85,8 @@ export function LetterScreen() {
     const info = launch.current;
     const angle = info?.angle ?? 0;
     const a = (angle * Math.PI) / 180;
-    const sx = info ? Math.min(1, Math.max(0.15, info.length / rect.width)) : 0.35;
-    const sy = info ? Math.min(1, Math.max(0.3, (info.length * 22) / 102 / rect.height)) : 0.6;
+    const sx = info ? clamp(info.length / rect.width, 0.15, 1) : 0.35;
+    const sy = info ? clamp((info.length * THICKNESS) / rect.height, 0.3, 1) : 0.6;
     // Centro del rollo cuando asoma: el cuello más medio largo, en la dirección de la botella.
     const startX = info ? info.x + (Math.cos(a) * rect.width * sx) / 2 : cx;
     const startY = info ? info.y + (Math.sin(a) * rect.width * sx) / 2 : window.innerHeight * 0.78;
@@ -110,19 +126,130 @@ export function LetterScreen() {
     };
   }, [phase, ribbon, unroll, dispatch]);
 
+
+  useEffect(() => {
+    if (phase !== 'rolling-up') return;
+    bottleBus.resetClosing();
+    if (reduced) {
+      contentOpacity.set(0);
+      unroll.set(0);
+      ribbon.set(0);
+      const id = window.setTimeout(() => setPhase('returning'), 0);
+      return () => window.clearTimeout(id);
+    }
+    const fadeOut = animate(contentOpacity, 0, transition.exit);
+    const rollUp = animate(unroll, 0, {
+      duration: dur.tide,
+      ease: ease.swell,
+      delay: 0.25,
+      onComplete: () => {
+        // La cinta vuelve a atarse.
+        animate(ribbon, 0, { duration: 0.5, ease: ease.surface, onComplete: () => setPhase('returning') });
+      },
+    });
+    return () => {
+      fadeOut.stop();
+      rollUp.stop();
+    };
+  }, [phase, reduced, contentOpacity, unroll, ribbon]);
+
+  // 4 bis. Cierre tras confirmar el plan: la carta aparece ya enrollada y atada.
+  useEffect(() => {
+    if (phase !== 'rolled') return;
+    bottleBus.resetClosing();
+    if (reduced) {
+      flyOpacity.set(1);
+      const id = window.setTimeout(() => setPhase('returning'), 0);
+      return () => window.clearTimeout(id);
+    }
+    flyScaleX.set(0.82);
+    flyScaleY.set(0.82);
+    animate(flyOpacity, 1, transition.enter);
+    animate(flyScaleX, 1, transition.enter);
+    animate(flyScaleY, 1, { ...transition.enter, onComplete: () => setPhase('returning') });
+  }, [phase, reduced, flyOpacity, flyScaleX, flyScaleY]);
+
+  // 5. Cuando la botella vuelve, la carta vuela hasta el cuello y entra.
+  useEffect(() => {
+    if (phase !== 'returning') return;
+    let started = false;
+    const flyIn = () => {
+      if (started) return;
+      started = true;
+      const el = rollerRef.current;
+      const neck = bottleBus.neck?.();
+      const finish = () => {
+        bottleBus.deliver.emit();
+        setPhase('gone');
+      };
+      if (reduced || !el || !neck) {
+        animate(flyOpacity, 0, { ...transition.reduced, onComplete: finish });
+        return;
+      }
+      const rect = el.getBoundingClientRect();
+      const a = (neck.angle * Math.PI) / 180;
+      const sx = clamp(neck.length / rect.width, 0.15, 1);
+      const sy = clamp((neck.length * THICKNESS) / rect.height, 0.3, 1);
+      const outX = neck.x + (Math.cos(a) * rect.width * sx) / 2 - (rect.left + rect.width / 2);
+      const outY = neck.y + (Math.sin(a) * rect.width * sx) / 2 - (rect.top + rect.height / 2);
+      const opts = { duration: 1.05, ease: ease.surface };
+      animate(flyX, outX, opts);
+      animate(flyY, outY, opts);
+      animate(flyScaleX, sx, opts);
+      animate(flyScaleY, sy, opts);
+      animate(flyRotate, neck.angle, {
+        ...opts,
+        onComplete: () => {
+          // Entra por el cuello y desaparece dentro.
+          const into = { duration: 0.42, ease: ease.sink };
+          animate(flyX, outX - Math.cos(a) * neck.length * 0.9, into);
+          animate(flyY, outY - Math.sin(a) * neck.length * 0.9, into);
+          animate(flyOpacity, 0, { ...into, onComplete: finish });
+        },
+      });
+    };
+    const off = bottleBus.arrived.on(flyIn);
+    const fallback = window.setTimeout(flyIn, 4200);
+    return () => {
+      off();
+      window.clearTimeout(fallback);
+    };
+  }, [phase, reduced, flyX, flyY, flyScaleX, flyScaleY, flyRotate, flyOpacity]);
+
+  // 6. Con la botella ya alejándose, aparece el mensaje final.
+  useEffect(() => {
+    if (!closingStep || phase !== 'gone') return;
+    const off = bottleBus.gone.on(() => setShowMessage(true));
+    const fallback = window.setTimeout(() => setShowMessage(true), 3500);
+    return () => {
+      off();
+      window.clearTimeout(fallback);
+    };
+  }, [closingStep, phase]);
+
   const outerY = useTransform(unroll, (p) => `${(p - 1) * 100}%`);
   const innerY = useTransform(unroll, (p) => `${(1 - p) * 100}%`);
   const trackY = useTransform(unroll, (p) => `${p * 100}%`);
   const curlOpacity = useTransform(unroll, [0, 0.06], [0, 1]);
 
+  const closing =
+    state.step === 'farewell'
+      ? {
+          title: config.farewell.title.replaceAll('{fecha}', formatDateLong(state.choice.date, true)),
+          message: fill(config.farewell.message),
+        }
+      : { title: fill(config.decline.title), message: fill(config.decline.message) };
+
   return (
-    <div className="screen-fixed">
+    <m.div className="screen-fixed" exit={{ opacity: 0, y: 26, transition: transition.exit }}>
       <div className="letter-wrap">
         <div className="letter">
           <m.div className="letter__shadow" style={{ scaleY: unroll }} />
           <m.div className="letter__paper-outer" style={{ y: outerY }}>
             <m.div className="letter__paper paper" style={{ y: innerY }}>
-              {state.step !== 'opening' && <LetterContent />}
+              <m.div className="letter__fade" style={{ opacity: contentOpacity }}>
+                {state.step !== 'opening' && <LetterContent />}
+              </m.div>
             </m.div>
           </m.div>
           <m.div className="letter__curl" style={{ opacity: curlOpacity }} aria-hidden="true" />
@@ -137,254 +264,26 @@ export function LetterScreen() {
           </m.div>
         </div>
       </div>
-    </div>
+      {showMessage && <ClosingMessage title={closing.title} message={closing.message} />}
+    </m.div>
   );
 }
 
-type How = 'tap' | 'swipe' | 'mist' | 'mist-held';
-
-/** Contenido de la carta: una página cada vez (cada una con su gesto) y, al final, la pregunta. */
-function LetterContent() {
-  const { state, dispatch } = useFlow();
-  // Si la página llega despejando la bruma, su texto ya está a la vista: no se vuelve a revelar.
-  const [arrivedBy, setArrivedBy] = useState<How | null>(null);
-  const next = (how: How) => {
-    setArrivedBy(how);
-    dispatch({ type: 'NEXT_PAGE' });
-  };
-  const revealed = arrivedBy === 'mist' || arrivedBy === 'mist-held';
-  if (state.step === 'question') return <QuestionPage key="question" revealed={revealed} />;
+/** Mensaje final, en el cielo, mientras la botella se aleja. */
+function ClosingMessage({ title, message }: { title: string; message: string }) {
   return (
-    <LetterPage
-      key={`page-${state.page}`}
-      page={state.page}
-      revealed={revealed}
-      waitForRelease={arrivedBy === 'mist-held'}
-      onNext={next}
-    />
-  );
-}
-
-type LetterPageProps = {
-  page: number;
-  /** El texto ya está a la vista (llegó despejando la bruma). */
-  revealed: boolean;
-  /** El dedo sigue apoyado del gesto anterior: no aceptar toques hasta que se levante. */
-  waitForRelease: boolean;
-  onNext: (how: How) => void;
-};
-
-function LetterPage({ page, revealed, waitForRelease, onNext }: LetterPageProps) {
-  const pages = config.letter.pages;
-  const { text, advance } = pages[page];
-  const pointerFine = usePointerFine();
-  const reduced = Boolean(useReducedMotion());
-  const hint = config.letter.hints[advance][pointerFine ? 'mouse' : 'touch'];
-  const isLast = page === pages.length - 1;
-  const nextText = isLast ? config.question.text : pages[page + 1].text;
-
-  const [complete, setComplete] = useState(revealed);
-  const [armed, setArmed] = useState(!waitForRelease);
-  const leaving = useRef(false);
-  const ready = armed && complete;
-  const swipeable = ready && advance === 'swipe';
-
-  // Si el dedo sigue apoyado, el clic que el navegador genera al levantarlo caería en esta
-  // página (por ejemplo, en el botón de deslizar). Hasta que se levante, nada responde.
-  useEffect(() => {
-    if (armed) return;
-    let timer = 0;
-    const release = () => {
-      timer = window.setTimeout(() => setArmed(true), 120);
-    };
-    window.addEventListener('pointerup', release, { once: true });
-    window.addEventListener('pointercancel', release, { once: true });
-    return () => {
-      window.removeEventListener('pointerup', release);
-      window.removeEventListener('pointercancel', release);
-      window.clearTimeout(timer);
-    };
-  }, [armed]);
-  const bodyRef = useRef<HTMLDivElement>(null);
-  const y = useMotionValue(0);
-  const fade = useMotionValue(1);
-  const hold = useMotionValue(0);
-  const fog = useMotionValue(0);
-
-  const swipeFade = useTransform(y, [-170, 0], [0, 1]);
-  const textOpacity = useTransform([fade, swipeFade, fog], ([f, s, g]: number[]) => f * s * (1 - g));
-  const nextOpacity = useTransform([fog, hold], ([g, h]: number[]) => g * h);
-
-  const swipe = useSwipeUp({
-    y,
-    enabled: swipeable,
-    wheelTarget: bodyRef,
-    onComplete: () => {
-      feedback('whoosh');
-      onNext('swipe');
-    },
-  });
-
-  const leaveByTap = () => {
-    if (leaving.current) return;
-    leaving.current = true;
-    feedback('tick');
-    animate(y, -14, transition.exit);
-    animate(fade, 0, { ...transition.exit, onComplete: () => onNext('tap') });
-  };
-
-  // Un toque mientras se revela lo completa; en las páginas de "tocar", el siguiente avanza.
-  const onLetterClick = () => {
-    if (!armed) return;
-    if (!complete) setComplete(true);
-    else if (advance === 'tap') leaveByTap();
-  };
-
-  // La bruma llega sola cuando ya hubo tiempo de leer (o al primer toque, lo que ocurra antes).
-  useEffect(() => {
-    if (!ready || advance !== 'hold') return;
-    const words = text.split(/s+/).length;
-    const id = window.setTimeout(
-      () => {
-        if (fog.get() === 0) animate(fog, 1, { duration: 1.6, ease: ease.swell });
-      },
-      (1.5 + words * 0.15) * 1000,
-    );
-    return () => window.clearTimeout(id);
-  }, [ready, advance, text, fog]);
-
-  // Si no hay gesto, el papel hace un amago hacia arriba como pista.
-  useEffect(() => {
-    if (!complete || advance !== 'swipe' || reduced) return;
-    const id = window.setInterval(() => {
-      if (y.get() !== 0 || y.isAnimating()) return;
-      animate(y, [0, -18, 0], { duration: 1.1, ease: ease.swell });
-    }, 4200);
-    return () => window.clearInterval(id);
-  }, [complete, advance, reduced, y]);
-
-
-  return (
-    <div className="letter__content">
-      <div
-        ref={bodyRef}
-        className={`letter__body ${swipeable ? 'is-swipeable' : ''} ${complete && advance === 'tap' ? 'is-tappable' : ''}`}
-        onClick={onLetterClick}
-        {...(advance === 'swipe' ? swipe.handlers : {})}
-      >
-        <div className="letter__stack" aria-live="polite">
-          <m.div className="letter__text" style={{ y, opacity: textOpacity }}>
-            {page === 0 && (
-              <RevealText text={fill(config.letter.greeting)} className="letter__greeting" complete={complete} />
-            )}
-            <RevealText
-              text={fill(text)}
-              className="letter__words"
-              delay={page === 0 ? 0.55 : 0.1}
-              complete={complete}
-              onDone={() => setComplete(true)}
-            />
-          </m.div>
-          {advance === 'hold' && (
-            <>
-              <m.div className="letter__text" style={{ opacity: nextOpacity }} aria-hidden="true">
-                <p className={isLast ? 'letter__question' : 'letter__words'}>{fill(nextText)}</p>
-              </m.div>
-              <Mist fog={fog} progress={hold} />
-            </>
-          )}
-        </div>
+    <div className="closing" role="status">
+      <div className="closing__text veil">
+        <RevealText as="h2" text={title} className="font-serif text-display font-medium text-on-sea" />
+        <m.p
+          className="closing__message text-body text-on-sea-soft"
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ ...transition.enter, delay: 0.9 }}
+        >
+          {message}
+        </m.p>
       </div>
-
-      <m.div
-        className="letter__footer"
-        initial={false}
-        animate={{ opacity: complete ? 1 : 0, y: complete ? 0 : 8 }}
-        transition={transition.enter}
-        inert={!ready}
-      >
-        {advance === 'tap' && (
-          <HintButton icon={<span className="pulse-dot" />} onClick={leaveByTap}>
-            {hint}
-          </HintButton>
-        )}
-        {advance === 'hold' && (
-          <div className="letter__hold">
-            <HoldButton
-              label={hint}
-              progress={hold}
-              icon={<FogIcon />}
-              onPressStart={() => {
-                if (fog.get() < 1) animate(fog, 1, { duration: 0.45, ease: ease.surface });
-              }}
-              onComplete={(pointerDown) => {
-                feedback('bubble');
-                onNext(pointerDown ? 'mist-held' : 'mist');
-              }}
-            />
-            <p className="letter__hint-text">{hint}</p>
-          </div>
-        )}
-        {advance === 'swipe' && (
-          <HintButton icon={<ChevronUpIcon />} className="hint-button--swipe" onClick={swipe.complete}>
-            {hint}
-          </HintButton>
-        )}
-      </m.div>
     </div>
-  );
-}
-
-/** Cierre de la carta. Los botones Sí y No (con el No que huye) llegan en la Fase 3. */
-function QuestionPage({ revealed }: { revealed: boolean }) {
-  const [done, setDone] = useState(revealed);
-  return (
-    <div className="letter__content">
-      <div className="letter__body">
-        <div className="letter__stack" aria-live="polite">
-          <div className="letter__text">
-            <RevealText
-              as="h2"
-              text={fill(config.question.text)}
-              className="letter__question"
-              complete={revealed}
-              onDone={() => setDone(true)}
-            />
-            <m.p
-              className="letter__signature"
-              initial={false}
-              animate={{ opacity: done ? 1 : 0, y: done ? 0 : 6 }}
-              transition={transition.enter}
-            >
-              {fill(config.letter.signature)}
-            </m.p>
-          </div>
-        </div>
-      </div>
-      <m.div
-        className="letter__footer"
-        initial={false}
-        animate={{ opacity: done ? 1 : 0 }}
-        transition={{ ...transition.enter, delay: 0.4 }}
-      >
-        <p className="label-caps text-center text-tide">Fase 3 · Aquí llegarán el Sí y el No</p>
-      </m.div>
-    </div>
-  );
-}
-
-function FogIcon() {
-  return (
-    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round">
-      <path d="M4 9c2-1.6 4-1.6 6 0s4 1.6 6 0 3-1.2 4-.6M4 13.5c2-1.6 4-1.6 6 0s4 1.6 6 0 3-1.2 4-.6M6 18c1.6-1.2 3.2-1.2 4.8 0s3.2 1.2 4.8 0" />
-    </svg>
-  );
-}
-
-function ChevronUpIcon() {
-  return (
-    <svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M5 12.5 10 7.5l5 5" />
-    </svg>
   );
 }
