@@ -1,0 +1,79 @@
+@layer base {
+  html {
+    height: 100%;
+    background: var(--color-sky);
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    overscroll-behavior: none;
+  }
+
+  body {
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+    overscroll-behavior: none;
+    font-family: var(--font-sans);
+    font-size: var(--text-body);
+    line-height: var(--text-body--line-height);
+    color: var(--color-deep);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  #root {
+    height: 100%;
+  }
+
+  button {
+    touch-action: manipulation;
+    cursor: pointer;
+  }
+
+  button:disabled {
+    cursor: default;
+  }
+
+  ::selection {
+    background: var(--color-aqua);
+    color: var(--color-abyss);
+  }
+
+  /* Anillo de foco visible sobre papel claro y sobre el mar de noche. */
+  :focus-visible {
+    outline: 2px solid var(--color-deep);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 5px rgb(244 251 249 / 0.9);
+  }
+}
+
+/* Texto que va directamente sobre el mar: cambia de color con la hora del día. */
+:root {
+  --on-sea: var(--color-deep);
+  --on-sea-soft: var(--color-ink-soft);
+}
+
+:root[data-mood='night'] {
+  --on-sea: var(--color-foam);
+  --on-sea-soft: var(--color-mint);
+}
+
+@utility text-on-sea {
+  color: var(--on-sea);
+  transition: color var(--duration-ambient) var(--ease-swell);
+}
+
+@utility text-on-sea-soft {
+  color: var(--on-sea-soft);
+  transition: color var(--duration-ambient) var(--ease-swell);
+}
+
+/* Etiquetas en versalitas espaciadas (días, matasellos, progreso). */
+@utility label-caps {
+  font-family: var(--font-sans);
+  font-size: var(--text-label);
+  line-height: var(--text-label--line-height);
+  letter-spacing: var(--text-label--letter-spacing);
+  font-weight: 600;
+  text-transform: uppercase;
+}

@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="es" data-mood="day">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content"
+    />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="theme-color" content="#c6e2ee" />
+    <meta name="color-scheme" content="only light" />
+    <meta name="format-detection" content="telephone=no" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <style>
+      /* Primer pintado: el mar ya está aquí aunque el JS tarde en llegar. */
+      html {
+        background: #c6e2ee;
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: linear-gradient(
+          180deg,
+          #c6e2ee 0%,
+          #dceef5 26%,
+          #edf7f5 43.6%,
+          #c9ebe4 44%,
+          #a9ddd6 60%,
+          #8fcdd3 78%,
+          #78bfb8 100%
+        );
+      }
+      @media (min-width: 1024px) {
+        body {
+          background: linear-gradient(
+            180deg,
+            #c6e2ee 0%,
+            #dceef5 34%,
+            #edf7f5 55.6%,
+            #c9ebe4 56%,
+            #a9ddd6 70%,
+            #8fcdd3 84%,
+            #78bfb8 100%
+          );
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <noscript>Esta invitación necesita JavaScript para abrir la botella.</noscript>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

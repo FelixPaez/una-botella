@@ -1,0 +1,105 @@
+/*
+ * Tokens del sistema de diseño: la única fuente de colores, tipografía,
+ * radios, sombras y curvas. Las curvas y duraciones están replicadas en
+ * src/design/motion.ts (un test comprueba que coinciden).
+ *
+ * Contrastes WCAG verificados (texto / fondo):
+ *   deep / foam 8,7:1 · deep / lagoon 5,0:1 · ink-soft / foam 5,3:1
+ *   foam / deep 8,7:1 · foam / abyss 11,6:1 · mint / abyss 9,7:1
+ *   tide y seaglass nunca se usan como fondo de texto normal.
+ */
+
+@theme static {
+  --color-*: initial;
+  --color-white: #ffffff;
+  --color-foam: #f4fbf9;
+  --color-paper: #fbf9f4;
+  --color-mist: #e4f3ef;
+  --color-sky: #dceef5;
+  --color-mint: #cbece2;
+  --color-aqua: #9fdcd1;
+  --color-lagoon: #8ccad9;
+  --color-seaglass: #6fc0b1;
+  --color-tide: #3b8792;
+  --color-deep: #1f4e5a;
+  --color-abyss: #143a45;
+  --color-ink-soft: #456e79;
+  --color-sand: #f2e8d8;
+  --color-sun: #f1cb86;
+
+  --font-*: initial;
+  --font-serif: 'Fraunces', 'Iowan Old Style', 'Palatino Linotype', Georgia, serif;
+  --font-sans: 'DM Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+
+  --text-*: initial;
+  --text-display: var(--fs-display);
+  --text-display--line-height: 1.04;
+  --text-display--letter-spacing: -0.02em;
+  --text-title: var(--fs-title);
+  --text-title--line-height: 1.12;
+  --text-title--letter-spacing: -0.01em;
+  --text-letter: var(--fs-letter);
+  --text-letter--line-height: 1.5;
+  --text-body: var(--fs-body);
+  --text-body--line-height: 1.55;
+  --text-small: 0.875rem;
+  --text-small--line-height: 1.45;
+  --text-label: 0.75rem;
+  --text-label--line-height: 1.2;
+  --text-label--letter-spacing: 0.14em;
+
+  --radius-card: 1.5rem;
+  --radius-chip: 0.875rem;
+
+  --shadow-*: initial;
+  --shadow-soft: 0 12px 32px -14px rgb(20 58 69 / 0.28), 0 2px 6px -2px rgb(20 58 69 / 0.08);
+  --shadow-float: 0 28px 60px -24px rgb(20 58 69 / 0.38), 0 8px 18px -10px rgb(20 58 69 / 0.16);
+  --shadow-stamp: 0 1px 2px rgb(20 58 69 / 0.22), 0 4px 10px -4px rgb(20 58 69 / 0.24);
+  --shadow-button: inset 0 1px 0 rgb(255 255 255 / 0.16), 0 10px 22px -12px rgb(20 58 69 / 0.55);
+
+  --ease-*: initial;
+  --ease-surface: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-sink: cubic-bezier(0.5, 0, 0.75, 0);
+  --ease-swell: cubic-bezier(0.45, 0, 0.55, 1);
+}
+
+:root {
+  /* Tamaños fluidos para móvil (360 → 430 px). */
+  --fs-display: clamp(2.5rem, 0.571rem + 8.571vw, 2.875rem);
+  --fs-title: clamp(1.75rem, 0.464rem + 5.714vw, 2rem);
+  --fs-letter: clamp(1.3125rem, 0.67rem + 2.857vw, 1.4375rem);
+  --fs-body: 1rem;
+
+  /* Duraciones (en sincronía con design/motion.ts). */
+  --duration-tap: 150ms;
+  --duration-exit: 320ms;
+  --duration-enter: 600ms;
+  --duration-tide: 1000ms;
+  --duration-ambient: 2400ms;
+
+  /* Composición. */
+  --gutter: 1.25rem;
+  --horizon: 44%;
+  --topbar: 3.5rem;
+}
+
+@media (min-width: 768px) {
+  :root {
+    --fs-display: 3.25rem;
+    --fs-title: 2.25rem;
+    --fs-letter: 1.5rem;
+    --gutter: 2rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --fs-display: 4rem;
+    --fs-title: 2.5rem;
+    --fs-letter: 1.625rem;
+    --fs-body: 1.0625rem;
+    --gutter: 2.5rem;
+    --horizon: 56%;
+    --topbar: 4.5rem;
+  }
+}
