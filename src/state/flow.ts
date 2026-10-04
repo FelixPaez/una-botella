@@ -50,7 +50,8 @@ export type FlowAction =
   | { type: 'ACCEPT' }
   | { type: 'CELEBRATED' }
   | { type: 'PICK_PLACE'; placeId: string; keepTime: boolean }
-  | { type: 'PICK_DATE'; date: string; keepTime: boolean }
+  /** Si no se conserva la hora, se propone `time` (la que el arco muestra al elegir el día). */
+  | { type: 'PICK_DATE'; date: string; keepTime: boolean; time?: string | null }
   | { type: 'PICK_TIME'; time: string }
   | { type: 'SET_NOTE'; note: string }
   | { type: 'CONTINUE' }
@@ -119,7 +120,7 @@ export function createFlowReducer({ pages, maxNoAttempts, allowDecline }: FlowOp
         if (state.step !== 'datetime') return state;
         return {
           ...state,
-          choice: { ...state.choice, date: action.date, time: action.keepTime ? state.choice.time : null },
+          choice: { ...state.choice, date: action.date, time: action.keepTime ? state.choice.time : (action.time ?? null) },
         };
 
       case 'PICK_TIME':

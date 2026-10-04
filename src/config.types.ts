@@ -14,6 +14,9 @@ export type LetterAdvance = 'tap' | 'hold' | 'swipe';
 /** Texto de ayuda en dos versiones: pantalla táctil y ratón. */
 export type Hint = { touch: string; mouse: string };
 
+/** Franja horaria en formato 24 h: desde `from` hasta `to`, ambas incluidas. */
+export type TimeWindow = { from: string; to: string };
+
 export type Place = {
   id: string;
   name: string;
@@ -29,10 +32,13 @@ export type Place = {
   /** Ilustración SVG de respaldo (y fondo mientras carga la foto). */
   illustration: PlaceIllustration;
   /**
-   * Horarios propios en formato 24 h ('18:30'). Si no hay, se usan los de `schedule.defaultTimes`.
-   * Con 'sunset' se calculan solos cada día a partir de la puesta de sol real.
+   * Cuándo se puede quedar (formato 24 h):
+   * - una franja, `{ from: '15:00', to: '18:00' }`: ella elige cualquier hora dentro, cada `schedule.stepMinutes`;
+   * - `'sunset'`: una franja que se calcula sola cada día alrededor de la puesta de sol real;
+   * - una lista fija, `['16:00', '17:30']`: solo esas horas.
+   * Si no se indica, se usa `schedule.defaultWindow`.
    */
-  times?: string[] | 'sunset';
+  times?: TimeWindow | 'sunset' | string[];
   /** Postal boca abajo que se voltea al tocarla. */
   mystery?: boolean;
 };
@@ -76,10 +82,13 @@ export type Config = {
     /** Fechas concretas en formato 'AAAA-MM-DD'. */
     excludedDates: string[];
     minHoursAhead: number;
-    defaultTimes: string[];
-    /** Minutos antes de la puesta de sol que se ofrecen en los planes con `times: 'sunset'`. */
-    sunsetOffsetsMinutes: number[];
-    /** Hora (24 h) a la que empieza cada franja de horarios. */
+    /** Cada cuántos minutos se puede elegir dentro de una franja (15 → 6:00, 6:15, 6:30…). */
+    stepMinutes: number;
+    /** Franja de los lugares que no indican la suya. */
+    defaultWindow: TimeWindow;
+    /** Planes con `times: 'sunset'`: desde `from` hasta `to` minutos antes de la puesta de sol. */
+    sunsetMinutesBefore: { from: number; to: number };
+    /** Hora (24 h) a la que empieza la mañana, la tarde y la noche («6:30 de la tarde»). */
     dayparts: { morning: string; afternoon: string; night: string };
   };
   note: { enabled: boolean; maxLength: number; placeholder: string; label: string };
@@ -90,6 +99,10 @@ export type Config = {
     label: string;
     title: string;
     timeTitle: string;
+    /** Debajo del arco de la hora. */
+    dragHint: Hint;
+    /** En los planes de atardecer; {hora} es la puesta de sol. */
+    sunsetAt: string;
     pickDayFirst: string;
     today: string;
     tomorrow: string;

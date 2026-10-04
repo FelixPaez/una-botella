@@ -11,7 +11,6 @@ export type Daypart = 'morning' | 'afternoon' | 'night';
 
 /** Índice = Date.getDay() (0 = domingo). */
 const WEEKDAYS: Weekday[] = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
-const DAYPART_LABEL: Record<Daypart, string> = { morning: 'Mañana', afternoon: 'Tarde', night: 'Noche' };
 const DAYPART_SPOKEN: Record<Daypart, string> = { morning: 'de la mañana', afternoon: 'de la tarde', night: 'de la noche' };
 
 const pad = (n: number) => String(n).padStart(2, '0');
@@ -58,12 +57,16 @@ export function daypartOf(time: string, schedule: Schedule = config.schedule): D
   return t >= minutesOf(afternoon) ? 'afternoon' : 'morning';
 }
 
-/** Para los chips: «6:30» (12 h, ya va bajo su franja) o «18:30». */
+/** La hora sola: «6:30» (12 h, la franja va aparte) o «18:30». */
 export function formatSlot(time: string, format: Config['timeFormat'] = config.timeFormat): string {
   const [h, m] = time.split(':').map(Number);
   if (format === '24h') return `${h}:${pad(m)}`;
   return `${h % 12 || 12}:${pad(m)}`;
 }
+
+/** «de la tarde» (12 h) o nada (24 h). */
+export const daypartSpoken = (time: string, format: Config['timeFormat'] = config.timeFormat): string =>
+  format === '24h' ? '' : DAYPART_SPOKEN[daypartOf(time)];
 
 /** Para frases: «6:30 de la tarde» (12 h) o «18:30». */
 export function formatTimeSpoken(time: string, format: Config['timeFormat'] = config.timeFormat): string {
@@ -71,30 +74,52 @@ export function formatTimeSpoken(time: string, format: Config['timeFormat'] = co
   return `${formatSlot(time, '12h')} ${DAYPART_SPOKEN[daypartOf(time)]}`;
 }
 
-const roundTo15 = (d: Date, timeZone: string) => {
-  const { hour, minute } = wallTime(d, timeZone);
-  const total = Math.round((hour * 60 + minute) / 15) * 15;
-  return `${pad(Math.floor(total / 60) % 24)}:${pad(total % 60)}`;
-};
+const toTime = (minutes: number) => `${pad(Math.floor(minutes / 60) % 24)}:${pad(minutes % 60)}`;
 
-/** Horarios de un lugar ese día: los suyos, los del atardecer real o los de por defecto. */
+/** Las horas de una franja (en minutos desde las 00:00), cada `step` minutos y sin salirse de ella. */
+export function expandWindow(from: number, to: number, step: number): string[] {
+  const times: string[] = [];
+  for (let t = Math.ceil(from / step) * step; t <= to; t += step) times.push(toTime(t));
+  return times;
+}
+
+/** La hora 'HH:MM' de la puesta de sol ese día en el lugar de la cita (null si ese día no se pone). */
+export function sunsetTime(iso: string, location: Location = config.location): string | null {
+  const sun = sunTimes(fromISODate(iso), location.latitude, location.longitude);
+  if (!sun) return null;
+  const { hour, minute } = wallTime(sun.sunset, location.timeZone);
+  return toTime(hour * 60 + minute);
+}
+
+/**
+ * Horarios que se pueden elegir en un lugar ese día: los de su franja (cada `stepMinutes`),
+ * los alrededor de la puesta de sol real, una lista fija o, si no tiene, la franja por defecto.
+ */
 export function placeTimes(
   place: Place | undefined,
   iso: string,
   schedule: Schedule = config.schedule,
   location: Location = config.location,
 ): string[] {
+  const step = schedule.stepMinutes;
+  const window = (w: { from: string; to: string }) => expandWindow(minutesOf(w.from), minutesOf(w.to), step);
   let times: string[];
   if (place?.times === 'sunset') {
-    const sun = sunTimes(fromISODate(iso), location.latitude, location.longitude);
-    times = sun
-      ? schedule.sunsetOffsetsMinutes.map((offset) => roundTo15(new Date(sun.sunset.getTime() - offset * 60_000), location.timeZone))
-      : schedule.defaultTimes;
+    const sunset = sunsetTime(iso, location);
+    const { from, to } = schedule.sunsetMinutesBefore;
+    times = sunset ? expandWindow(minutesOf(sunset) - from, minutesOf(sunset) - to, step) : window(schedule.defaultWindow);
+  } else if (Array.isArray(place?.times) && place.times.length) {
+    times = place.times;
+  } else if (place?.times && !Array.isArray(place.times)) {
+    times = window(place.times);
   } else {
-    times = place?.times?.length ? place.times : schedule.defaultTimes;
+    times = window(schedule.defaultWindow);
   }
   return [...new Set(times)].sort((a, b) => minutesOf(a) - minutesOf(b));
 }
+
+/** La hora que se propone al elegir un día: la del medio de lo que queda libre. */
+export const suggestedTime = (times: string[]): string | null => times[Math.floor((times.length - 1) / 2)] ?? null;
 
 /** Los horarios que todavía valen: si es hoy, solo los que empiezan pasadas `minHoursAhead` horas. */
 export function availableTimes(
@@ -164,12 +189,6 @@ export function buildDays(
       reason: excluded ? 'ese día no está disponible' : times.length === 0 ? 'ya no quedan horarios' : undefined,
     };
   });
-}
-
-export function groupTimes(times: string[], schedule: Schedule = config.schedule) {
-  return (['morning', 'afternoon', 'night'] as const)
-    .map((key) => ({ key, label: DAYPART_LABEL[key], times: times.filter((t) => daypartOf(t, schedule) === key) }))
-    .filter((group) => group.times.length > 0);
 }
 
 /** Cómo estará el cielo a esa hora (el mar se pone así al elegirla). */

@@ -24,8 +24,9 @@ Se abre desde un enlace de WhatsApp. Se trabaja por fases y cada una necesita el
 2. Faro al final del horizonte: el barquito llega y el faro se enciende al confirmar.
 3. La botella es un personaje persistente: queda pequeña en el horizonte y regresa al final.
 4. La luna del cielo nocturno es la fase real del día elegido.
-5. Atardecer real: el plan «Atardecer» ofrece horarios 60 y 30 min antes de la puesta de sol calculada.
+5. Atardecer real: el plan «Atardecer» ofrece la franja de 90 a 15 min antes de la puesta de sol calculada.
 6. Guiños con humor ligero según lo que elija (luna llena, fin de semana, hoy mismo).
+7. La hora se elige en un arco del cielo: ella arrastra el sol (o la luna) dentro de la franja de cada lugar, de 15 en 15 min, y el mar cambia mientras tanto. Funciona con teclado (slider accesible).
 
 Descartadas: vibración en iPhone con el truco de `<input switch>`; «sin sonido».
 

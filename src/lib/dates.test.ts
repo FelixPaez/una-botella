@@ -10,9 +10,11 @@ import {
   formatDateLong,
   formatSlot,
   formatTimeSpoken,
-  groupTimes,
+  expandWindow,
   placeTimes,
   quipFor,
+  suggestedTime,
+  sunsetTime,
 } from './dates.ts';
 import { buildMessage, whatsappUrl } from './whatsapp.ts';
 import { isoDateIn, zonedInstant } from './zone.ts';
@@ -71,17 +73,39 @@ describe('zona horaria del lugar', () => {
 });
 
 describe('horarios', () => {
-  it('el atardecer usa la puesta de sol real de Santa Clara (60 y 30 min antes)', () => {
-    expect(placeTimes(sunsetPlace, '2026-10-04', schedule)).toEqual(['18:00', '18:30']);
+  it('el atardecer usa la puesta de sol real de Santa Clara (de 90 a 15 min antes, cada 15)', () => {
+    // El 4 de octubre el sol se pone hacia las 19:04.
+    expect(sunsetTime('2026-10-04')).toMatch(/^19:0\d$/);
+    expect(placeTimes(sunsetPlace, '2026-10-04', schedule)).toEqual(['17:45', '18:00', '18:15', '18:30', '18:45']);
     // Tras el cambio de hora la puesta es hacia las 17:42.
-    expect(placeTimes(sunsetPlace, '2026-11-02', schedule)).toEqual(['16:45', '17:15']);
+    expect(placeTimes(sunsetPlace, '2026-11-02', schedule)).toEqual(['16:15', '16:30', '16:45', '17:00', '17:15']);
   });
 
-  it('agrupa por franjas y las nombra', () => {
+  it('una franja se convierte en horas cada stepMinutes, sin salirse de ella', () => {
+    const picnic: Place = { ...cafe, times: { from: '15:00', to: '16:00' } };
+    expect(placeTimes(picnic, '2026-10-06', schedule)).toEqual(['15:00', '15:15', '15:30', '15:45', '16:00']);
+    expect(placeTimes(picnic, '2026-10-06', { ...schedule, stepMinutes: 30 })).toEqual(['15:00', '15:30', '16:00']);
+    expect(expandWindow(17 * 60 + 34, 18 * 60 + 49, 15)).toEqual(['17:45', '18:00', '18:15', '18:30', '18:45']);
+    // Una lista fija se respeta tal cual (ordenada).
+    expect(placeTimes({ ...cafe, times: ['16:00', '09:30'] }, '2026-10-06', schedule)).toEqual(['09:30', '16:00']);
+    // Sin `times`, la franja por defecto.
+    expect(placeTimes({ ...cafe, times: undefined }, '2026-10-06', { ...schedule, defaultWindow: { from: '10:00', to: '10:30' } })).toEqual([
+      '10:00',
+      '10:15',
+      '10:30',
+    ]);
+  });
+
+  it('propone la hora del medio de lo que queda libre', () => {
+    expect(suggestedTime(['17:45', '18:00', '18:15', '18:30', '18:45'])).toBe('18:15');
+    expect(suggestedTime(['16:00', '16:30'])).toBe('16:00');
+    expect(suggestedTime([])).toBeNull();
+  });
+
+  it('nombra la franja del día para decir la hora', () => {
     expect(daypartOf('09:30')).toBe('morning');
     expect(daypartOf('18:30')).toBe('afternoon');
     expect(daypartOf('20:00')).toBe('night');
-    expect(groupTimes(['09:30', '16:00', '20:00']).map((g) => g.label)).toEqual(['Mañana', 'Tarde', 'Noche']);
   });
 
   it('formatea como se dice', () => {

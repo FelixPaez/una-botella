@@ -1,5 +1,5 @@
 import { config } from '../config.ts';
-import { addDays, availableTimes, todayIn } from '../lib/dates.ts';
+import { addDays, availableTimes, suggestedTime, todayIn } from '../lib/dates.ts';
 import { initialFlow, type FlowState, type Step } from './flow.ts';
 
 /** Clave en sessionStorage (no es una cookie, no sale del móvil y se borra al cerrar la pestaña). */
@@ -56,11 +56,11 @@ export function stateForParam(param: string, pages: number): FlowState | null {
   if (param === 'pregunta') return { ...initialFlow, step: 'question', page: pages - 1 };
   if (param === 'plan') return { ...initialFlow, step: 'plan', page: pages - 1 };
   if (param === 'fecha' || param === 'resumen' || param === 'final') {
-    // Una elección de ejemplo: el primer plan, dentro de dos días, a su primera hora.
+    // Una elección de ejemplo: el primer plan, dentro de dos días, a la hora que propone el arco.
     const place = config.places[0];
     const now = new Date();
     const date = addDays(todayIn(now), 2);
-    const time = availableTimes(place, date, now)[0] ?? null;
+    const time = suggestedTime(availableTimes(place, date, now));
     const choice = { ...initialFlow.choice, placeId: place.id, date, time };
     const step: Step = param === 'fecha' ? 'datetime' : param === 'resumen' ? 'summary' : 'farewell';
     return { ...initialFlow, step, page: pages - 1, choice };

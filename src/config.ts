@@ -105,6 +105,7 @@ export const config: Config = {
   },
 
   // Cada lugar es una postal. Funciona igual con 3, 5 u 8.
+  // `times`: la franja en la que se puede quedar; ella elige la hora exacta deslizando el sol.
   // Fotos: WebP de 1000×800 px y menos de 150 KB en `public/places/`.
   places: [
     {
@@ -114,7 +115,7 @@ export const config: Config = {
       description:
         'Vemos al sol esconderse en el mar, con algo rico para picar y sin mirar el reloj.',
       illustration: 'sunset',
-      times: 'sunset', // se calculan solos con la puesta de sol de cada día
+      times: 'sunset', // se calcula sola cada día con la puesta de sol real
     },
     {
       id: 'picnic',
@@ -123,7 +124,7 @@ export const config: Config = {
       description:
         'Plan tranquilo de tarde: algo rico, un buen lugar en la arena y que la conversación haga el resto.',
       illustration: 'picnic',
-      times: ['15:00', '16:00', '17:00'],
+      times: { from: '15:00', to: '18:00' },
     },
     {
       id: 'cafe',
@@ -132,7 +133,7 @@ export const config: Config = {
       description:
         'Una mesa junto a la ventana, el mar de fondo y todo el tiempo del mundo para conocernos mejor.',
       illustration: 'cafe',
-      times: ['09:30', '10:30', '16:00'],
+      times: { from: '09:00', to: '18:00' },
     },
     {
       id: 'paseo-nocturno',
@@ -141,7 +142,7 @@ export const config: Config = {
       description:
         'Caminamos junto al mar con la brisa de la noche. Aviso: soy muy competitivo contando estrellas.',
       illustration: 'night-walk',
-      times: ['20:00', '20:30', '21:00'],
+      times: { from: '19:30', to: '22:00' },
     },
     {
       id: 'misterio',
@@ -158,8 +159,9 @@ export const config: Config = {
     excludedWeekdays: [], // ej. ['lunes', 'martes']
     excludedDates: [], // ej. ['2026-10-12']
     minHoursAhead: 2,
-    defaultTimes: ['10:00', '16:00', '17:30', '20:00'],
-    sunsetOffsetsMinutes: [60, 30],
+    stepMinutes: 15, // ella elige la hora de 15 en 15 minutos
+    defaultWindow: { from: '10:00', to: '20:00' }, // para los lugares sin `times`
+    sunsetMinutesBefore: { from: 90, to: 15 }, // atardecer: de 90 a 15 min antes de la puesta
     dayparts: { morning: '05:00', afternoon: '12:00', night: '19:00' },
   },
 
@@ -185,6 +187,8 @@ export const config: Config = {
     label: 'La fecha',
     title: '¿Qué día te cuadra?',
     timeTitle: '¿A qué hora?',
+    dragHint: { touch: 'Desliza por el arco para cambiar la hora', mouse: 'Arrastra por el arco o usa las flechas' },
+    sunsetAt: 'El sol se pone a las {hora}',
     pickDayFirst: 'Primero escoge un día.',
     today: 'Hoy',
     tomorrow: 'Mañana',

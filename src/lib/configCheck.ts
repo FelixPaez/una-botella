@@ -1,4 +1,4 @@
-import type { Config, LetterAdvance, PlaceIllustration, Weekday } from '../config.types.ts';
+import type { Config, LetterAdvance, PlaceIllustration, TimeWindow, Weekday } from '../config.types.ts';
 
 /** Rutas de config.ts cuyos textos todavía contienen "TODO". */
 export function findTodos(value: unknown, path = 'config'): string[] {
@@ -24,6 +24,10 @@ export function checkConfig(config: Config): string[] {
   const problems: string[] = [];
   const add = (where: string, what: string) => problems.push(`${where}: ${what}`);
   const isTodo = (text: string) => /\bTODO\b/.test(text);
+  const checkWindow = (where: string, w: TimeWindow) => {
+    if (!TIME.test(w.from) || !TIME.test(w.to)) add(where, 'usa horas HH:MM (24 h), ej. { from: \'15:00\', to: \'18:00\' }');
+    else if (w.from >= w.to) add(where, `la franja debe empezar antes de terminar ("${w.from}" → "${w.to}")`);
+  };
 
   const phone = config.sender.whatsapp;
   if (!isTodo(phone) && !/^\d{8,15}$/.test(phone)) {
@@ -52,6 +56,8 @@ export function checkConfig(config: Config): string[] {
     }
     if (Array.isArray(place.times)) {
       place.times.forEach((t) => TIME.test(t) || add(`${where}.times`, `"${t}" no es una hora HH:MM (24 h)`));
+    } else if (place.times && place.times !== 'sunset') {
+      checkWindow(`${where}.times`, place.times);
     }
     if (place.image && /^\//.test(place.image)) {
       add(`${where}.image`, 'escribe la ruta sin "/" inicial (ej. places/atardecer.webp)');
@@ -61,7 +67,11 @@ export function checkConfig(config: Config): string[] {
   const s = config.schedule;
   if (s.daysAhead < 1 || s.daysAhead > 60) add('schedule.daysAhead', 'debe estar entre 1 y 60');
   if (s.minHoursAhead < 0) add('schedule.minHoursAhead', 'no puede ser negativo');
-  s.defaultTimes.forEach((t) => TIME.test(t) || add('schedule.defaultTimes', `"${t}" no es una hora HH:MM`));
+  if (!(s.stepMinutes >= 5 && s.stepMinutes <= 120)) add('schedule.stepMinutes', 'debe estar entre 5 y 120 minutos');
+  checkWindow('schedule.defaultWindow', s.defaultWindow);
+  if (!(s.sunsetMinutesBefore.from > s.sunsetMinutesBefore.to)) {
+    add('schedule.sunsetMinutesBefore', '`from` debe ser mayor que `to` (ej. { from: 90, to: 15 })');
+  }
   s.excludedDates.forEach((d) => DATE.test(d) || add('schedule.excludedDates', `"${d}" no es AAAA-MM-DD`));
   s.excludedWeekdays.forEach((d) => WEEKDAYS.includes(d) || add('schedule.excludedWeekdays', `"${d}" no es un día`));
   Object.entries(s.dayparts).forEach(([k, t]) => TIME.test(t) || add(`schedule.dayparts.${k}`, `"${t}" no es HH:MM`));

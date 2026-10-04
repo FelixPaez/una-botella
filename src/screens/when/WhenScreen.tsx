@@ -5,18 +5,18 @@ import { config } from '../../config.ts';
 import { spring, transition } from '../../design/motion.ts';
 import { useIsDesktop } from '../../hooks/useMediaQuery.ts';
 import { useNow } from '../../hooks/useNow.ts';
-import { buildDays, capitalize, formatSlot, groupTimes, quipFor, type Day, type Daypart } from '../../lib/dates.ts';
+import { buildDays, capitalize, quipFor, suggestedTime, sunsetTime, type Day } from '../../lib/dates.ts';
 import { moonPhaseName } from '../../lib/moon.ts';
 import { useFlow } from '../../state/flowContext.ts';
 import { Button } from '../../ui/Button.tsx';
-import { Chip } from '../../ui/Chip.tsx';
 import { MoonIcon } from '../../ui/MoonIcon.tsx';
 import { RevealText } from '../../ui/RevealText.tsx';
 import { feedback } from '../../design/feedback.ts';
+import { TimeArc } from './TimeArc.tsx';
 
 const south = config.location.latitude < 0;
 
-/** Fecha y hora: días con su luna, horarios por franjas y una nota opcional. */
+/** Fecha y hora: días con su luna, la hora en el arco del cielo y una nota opcional. */
 export function WhenScreen() {
   const { state, dispatch } = useFlow();
   const desktop = useIsDesktop();
@@ -27,16 +27,20 @@ export function WhenScreen() {
   const selectedDay = days.find((d) => d.iso === date);
   const editing = state.returnTo === 'summary';
 
-  // Si mientras ella mira pasa la hora (o el día deja de valer), la hora elegida se libera.
+  // Con un día elegido siempre hay una hora propuesta; si mientras ella mira esa hora
+  // deja de valer (ya pasó, o el día no tiene huecos), se propone otra o se libera.
   useEffect(() => {
-    if (date && time && !selectedDay?.times.includes(time)) {
-      dispatch({ type: 'PICK_DATE', date, keepTime: false });
-    }
+    if (!date) return;
+    const times = selectedDay?.times ?? [];
+    if (time && times.includes(time)) return;
+    const next = suggestedTime(times);
+    if (next !== time) dispatch({ type: 'PICK_DATE', date, keepTime: false, time: next });
   }, [date, time, selectedDay, dispatch]);
 
   const pickDay = (day: Day) => {
     if (!day.available) return;
-    dispatch({ type: 'PICK_DATE', date: day.iso, keepTime: Boolean(time && day.times.includes(time)) });
+    const keepTime = Boolean(time && day.times.includes(time));
+    dispatch({ type: 'PICK_DATE', date: day.iso, keepTime, time: suggestedTime(day.times) });
   };
 
   const quip = selectedDay ? quipFor(selectedDay) : null;
@@ -83,32 +87,17 @@ export function WhenScreen() {
 
         <section className="when__times card-panel paper">
           <p className="label-caps text-ink-soft">{config.when.timeTitle}</p>
-          {!selectedDay ? (
+          {!selectedDay || !date ? (
             <p className="mt-3 text-small text-ink-soft">{config.when.pickDayFirst}</p>
           ) : (
-            <div className="when__groups">
-              {groupTimes(selectedDay.times).map((group, i) => (
-                <m.div
-                  key={`${selectedDay.iso}-${group.key}`}
-                  className="when__group"
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ ...transition.enter, delay: i * 0.07 }}
-                >
-                  <p className="when__group-label">
-                    <DaypartIcon part={group.key} />
-                    {group.label}
-                  </p>
-                  <div role="radiogroup" aria-label={`Horarios de la ${group.label.toLowerCase()}`} className="when__chips">
-                    {group.times.map((t) => (
-                      <Chip key={t} selected={time === t} onClick={() => dispatch({ type: 'PICK_TIME', time: t })}>
-                        {formatSlot(t)}
-                      </Chip>
-                    ))}
-                  </div>
-                </m.div>
-              ))}
-            </div>
+            <TimeArc
+              key={date}
+              times={selectedDay.times}
+              value={time}
+              date={date}
+              sunset={place?.times === 'sunset' ? sunsetTime(date) : null}
+              onChange={(t) => dispatch({ type: 'PICK_TIME', time: t })}
+            />
           )}
 
           {config.note.enabled && (
@@ -223,27 +212,5 @@ function DayButton({ day, selected, dim, showMonth, compact = false, onPick }: D
       </span>
       <span className="day__reflection" aria-hidden="true" />
     </m.button>
-  );
-}
-
-function DaypartIcon({ part }: { part: Daypart }) {
-  const common = { width: 16, height: 16, viewBox: '0 0 20 20', fill: 'none', stroke: 'currentColor', strokeWidth: 1.6, strokeLinecap: 'round' as const, 'aria-hidden': true };
-  if (part === 'morning')
-    return (
-      <svg {...common}>
-        <path d="M3 14h14M6 14a4 4 0 0 1 8 0M10 5v2M4.5 8.5l1.3 1.3M15.5 8.5l-1.3 1.3" />
-      </svg>
-    );
-  if (part === 'afternoon')
-    return (
-      <svg {...common}>
-        <circle cx="10" cy="10" r="3.4" />
-        <path d="M10 2.5v2M10 15.5v2M2.5 10h2M15.5 10h2M4.7 4.7l1.4 1.4M13.9 13.9l1.4 1.4M4.7 15.3l1.4-1.4M13.9 6.1l1.4-1.4" />
-      </svg>
-    );
-  return (
-    <svg {...common}>
-      <path d="M13.5 13.6A6 6 0 0 1 8.2 4a6.2 6.2 0 1 0 7.8 7.8 5.8 5.8 0 0 1-2.5 1.8z" />
-    </svg>
   );
 }

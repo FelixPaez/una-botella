@@ -54,11 +54,16 @@ Cada lugar es una postal. Funciona igual con 3, 5 u 8. Copia un bloque dentro de
   image: 'places/malecon.webp',        // opcional: la foto (ver abajo)
   imageAlt: 'El malecón al atardecer', // opcional: descripción de la foto
   imageFocus: 'center 30%',            // opcional: qué parte de la foto se ve
-  times: 'sunset',                     // o ['16:00', '17:30'], o nada (usa los horarios por defecto)
+  times: { from: '16:00', to: '19:00' }, // la franja en la que puedes (ver abajo)
 },
 ```
 
-- `times: 'sunset'` calcula cada día los horarios con la **puesta de sol real** (60 y 30 minutos antes).
+- `times` es **la franja en la que puedes quedar**. Ella elige la hora exacta deslizando el sol por un arco,
+  de 15 en 15 minutos (`schedule.stepMinutes`), y el mar cambia a esa hora mientras lo mueve.
+  - `{ from: '16:00', to: '19:00' }`: cualquier hora entre las 4:00 y las 7:00 de la tarde (formato 24 h).
+  - `'sunset'`: la franja se calcula sola cada día con la **puesta de sol real** (de 90 a 15 minutos antes).
+  - `['16:00', '17:30']`: solo esas horas, si prefieres horas fijas.
+  - Sin `times`: la franja por defecto (`schedule.defaultWindow`).
 - `mystery: true` deja la postal boca abajo hasta que ella la toca. En el mensaje sale como «Plan sorpresa».
 - Para quitar un lugar, borra su bloque entero.
 
@@ -81,10 +86,13 @@ En `schedule`:
 | `daysAhead` | Cuántos días se ofrecen desde hoy (14 = dos semanas) |
 | `excludedWeekdays` | Días de la semana que no puedes, ej. `['lunes', 'martes']` |
 | `excludedDates` | Fechas concretas que no puedes, ej. `['2026-10-12']` |
-| `minHoursAhead` | Si elige hoy, solo horarios que empiecen dentro de al menos estas horas |
-| `defaultTimes` | Horarios de los lugares que no tienen los suyos (formato 24 h: `'17:30'`) |
-| `sunsetOffsetsMinutes` | Minutos antes de la puesta de sol para los planes de atardecer |
-| `dayparts` | A qué hora empiezan la mañana, la tarde y la noche (para agrupar los horarios) |
+| `minHoursAhead` | Si elige hoy, solo horas que empiecen dentro de al menos estas horas |
+| `stepMinutes` | Cada cuántos minutos se puede elegir dentro de una franja (15 → 6:00, 6:15, 6:30…) |
+| `defaultWindow` | Franja de los lugares que no tienen la suya, ej. `{ from: '10:00', to: '20:00' }` |
+| `sunsetMinutesBefore` | Planes de atardecer: desde y hasta cuántos minutos antes de la puesta, ej. `{ from: 90, to: 15 }` |
+| `dayparts` | A qué hora empiezan la mañana, la tarde y la noche (para decir «6:30 de la tarde») |
+
+Al elegir un día, el arco propone la hora del medio de la franja; ella la mueve si quiere.
 
 Las horas son siempre las de **Santa Clara** (`location.timeZone`), aunque alguien abra el enlace
 con el móvil en otra zona horaria. El cambio de hora de Cuba está contemplado.

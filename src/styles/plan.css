@@ -420,24 +420,109 @@
     padding: 1.4rem 1.25rem 1.25rem;
     box-shadow: var(--shadow-soft);
   }
-  .when__groups {
-    display: grid;
-    gap: 1rem;
-    margin-top: 0.9rem;
+  /* ---------- Arco de la hora ---------- */
+
+  .time-arc {
+    margin-top: 0.75rem;
   }
-  .when__group-label {
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
+  .time-arc__dial {
+    position: relative;
+    max-width: 21rem;
+    margin: 0 auto;
+    padding-bottom: 1.4rem;
+    border-radius: 1rem;
+    outline: none;
+  }
+  .time-arc__dial:focus-visible {
+    box-shadow:
+      0 0 0 2px var(--color-deep),
+      0 0 0 5px rgb(245 250 253 / 0.9);
+  }
+  /* El arco no deja desplazar la página mientras ella arrastra el sol. */
+  .time-arc__svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+    touch-action: none;
+    cursor: grab;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  .time-arc__svg[data-dragging] {
+    cursor: grabbing;
+  }
+  .time-arc__hit {
+    fill: none;
+    stroke: transparent;
+    stroke-width: 60;
+    stroke-linecap: round;
+  }
+  .time-arc__rail {
+    fill: none;
+    stroke: rgb(24 70 106 / 0.08);
+    stroke-width: 18;
+    stroke-linecap: round;
+  }
+  .time-arc__track {
+    fill: none;
+    stroke-width: 8;
+    stroke-linecap: round;
+  }
+  .time-arc__tick {
+    fill: rgb(24 70 106 / 0.35);
+  }
+  .time-arc__shade {
+    fill: rgb(15 51 82 / 0.18);
+  }
+  .time-arc__body {
+    stroke: rgb(255 255 255 / 0.9);
+    stroke-width: 1.5;
+  }
+  .time-arc__readout {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 40%;
+    display: grid;
+    justify-items: center;
+    pointer-events: none;
+  }
+  .time-arc__clock {
+    font-family: var(--font-serif);
+    font-size: 2.75rem;
+    line-height: 1;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    color: var(--color-deep);
+  }
+  .time-arc__daypart {
+    margin-top: 0.3rem;
     font-size: var(--text-small);
     font-weight: 600;
     color: var(--color-ink-soft);
   }
-  .when__chips {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    margin-top: 0.5rem;
+  .time-arc__end {
+    position: absolute;
+    top: calc(80% - 0.6rem);
+    transform: translateX(-50%);
+    font-size: var(--text-label);
+    font-weight: 700;
+    color: var(--color-ink-soft);
+    pointer-events: none;
+  }
+  .time-arc__sunset {
+    margin-top: 0.4rem;
+    text-align: center;
+    font-size: var(--text-small);
+    font-weight: 600;
+    color: var(--color-tide);
+  }
+  .time-arc__hint {
+    margin-top: 0.2rem;
+    text-align: center;
+    font-size: var(--text-label);
+    color: var(--color-ink-soft);
   }
 
   /* La nota: renglones de carta y cursiva. 16 px como mínimo: iOS no hace zoom. */
